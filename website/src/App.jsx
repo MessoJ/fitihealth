@@ -150,7 +150,7 @@ function Hero() {
       <div className="hero">
         <div className="hero-img-side">
           <img
-            src="/hero-photo.jpg"
+            src="./hero-photo.jpg"
             alt="Two older adults in genuine conversation"
             loading="eager"
             fetchPriority="high"
@@ -346,7 +346,7 @@ function Proof() {
                 data I can present to my board."
               </p>
               <div className="proof-attr">
-                <img src="/advisor.jpg" alt="Dr. Sarah Mitchell" className="proof-avatar" />
+                <img src="./advisor.jpg" alt="Dr. Sarah Mitchell" className="proof-avatar" />
                 <div>
                   <div className="proof-name">Dr. Sarah Mitchell</div>
                   <div className="proof-role">VP Population Health · Clinical Advisor</div>
@@ -435,7 +435,7 @@ function Platform() {
           </div>
           <div className="p-lead-img">
             <img
-              src="/mockup-connect.jpg"
+              src="./mockup-connect.jpg"
               alt="FiTi Connect mobile interface showing community circles and check-ins"
               loading="lazy"
             />
@@ -447,7 +447,7 @@ function Platform() {
           <div ref={rp1} className="p-card fade-up d1">
             <div className="p-card-img">
               <img
-                src="/mockup-clinical.jpg"
+                src="./mockup-clinical.jpg"
                 alt="FiTi Clinical dashboard showing patient risk scores"
                 loading="lazy"
               />
@@ -472,7 +472,7 @@ function Platform() {
           <div ref={rp2} className="p-card fade-up d2">
             <div className="p-card-img">
               <img
-                src="/mockup-command.jpg"
+                src="./mockup-command.jpg"
                 alt="FiTi Command analytics showing cohort outcomes"
                 loading="lazy"
               />
@@ -888,7 +888,7 @@ function Contact() {
             </div>
 
             <div className="advisor-strip">
-              <img src="/advisor.jpg" alt="Dr. Sarah Mitchell" className="advisor-img" />
+              <img src="./advisor.jpg" alt="Dr. Sarah Mitchell" className="advisor-img" />
               <div className="advisor-info">
                 <strong>Dr. Sarah Mitchell</strong><br />
                 VP Population Health · Clinical Advisor to FiTi
