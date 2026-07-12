@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FiTi Health — Design Blueprint</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #0F1623;
+  --dark: #1A2336;
+  --coral: #E8714A;
+  --coral-lite: rgba(232,113,74,0.11);
+  --coral-mid: rgba(232,113,74,0.22);
+  --teal: #0E9080;
+  --teal-lite: rgba(14,144,128,0.1);
+  --purple: #6B5CE7;
+  --purple-lite: rgba(107,92,231,0.1);
+  --warm: #F7F4EF;
+  --white: #FFFFFF;
+  --muted: #6B7A96;
+  --border: #E2E8F0;
+  --display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --body: 'Inter', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', 'Courier New', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { font-family: var(--body); background: var(--warm); color: var(--dark); line-height: 1.6; font-size: 14px; overflow-x: hidden; }
+
+/* ─── NAV ─────────────────────────────────────────── */
+.nav {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--night);
+  padding: 0 20px;
+  height: 52px;
+  display: flex; align-items: center; gap: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav-logo {
+  font-family: var(--display); font-weight: 800; font-size: 17px;
+  color: white; letter-spacing: -0.3px; white-space: nowrap;
+  margin-right: 20px; flex-shrink: 0;
+}
+.nav-logo em { font-style: normal; color: var(--coral); }
+.nav-link {
+  color: rgba(255,255,255,0.45); font-size: 12px; font-weight: 500;
+  text-decoration: none; padding: 4px 10px; border-radius: 6px;
+  white-space: nowrap; transition: color 0.15s; flex-shrink: 0;
+}
+.nav-link:hover, .nav-link:focus { color: white; background: rgba(255,255,255,0.07); }
+.nav-spacer { flex: 1; min-width: 8px; }
+.nav-badge {
+  background: var(--coral-lite); border: 1px solid var(--coral-mid);
+  color: var(--coral); font-size: 10px; font-family: var(--mono);
+  padding: 4px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0;
+}
+
+/* ─── LAYOUT ──────────────────────────────────────── */
+.wrap { max-width: 1140px; margin: 0 auto; padding: 0 20px; }
+.section { padding: 60px 0; }
+
+/* ─── TOKENS ──────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase; color: var(--coral);
+  margin-bottom: 10px;
+}
+.section-title {
+  font-family: var(--display); font-size: clamp(24px, 5vw, 34px);
+  font-weight: 800; letter-spacing: -0.5px; color: var(--dark);
+  line-height: 1.15; margin-bottom: 12px;
+}
+.section-lead {
+  font-size: 15px; color: var(--muted); line-height: 1.75;
+  max-width: 560px; margin-bottom: 36px;
+}
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 0 20px; }
+
+/* ─── HERO ────────────────────────────────────────── */
+.hero {
+  background: var(--night); padding: 64px 0 72px;
+  position: relative; overflow: hidden;
+}
+.hero-rings {
+  position: absolute; right: -60px; top: 50%;
+  transform: translateY(-50%); opacity: 0.07; pointer-events: none;
+}
+.hero-inner { max-width: 1140px; margin: 0 auto; padding: 0 20px; }
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(232,113,74,0.1); border: 1px solid rgba(232,113,74,0.2);
+  padding: 6px 14px; border-radius: 100px; margin-bottom: 28px;
+}
+.hero-pill-dot {
+  width: 6px; height: 6px; background: var(--coral); border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+.hero-pill-text {
+  font-family: var(--mono); font-size: 10px; color: var(--coral);
+  text-transform: uppercase; letter-spacing: 1.5px;
+}
+.hero h1 {
+  font-family: var(--display); font-size: clamp(30px, 7vw, 52px);
+  font-weight: 800; color: white; line-height: 1.08;
+  letter-spacing: -1px; max-width: 620px; margin-bottom: 20px;
+}
+.hero h1 .accent { color: var(--coral); }
+.hero-sub { font-size: 15px; color: rgba(255,255,255,0.5); max-width: 440px; line-height: 1.7; }
+.hero-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 40px 0 32px; }
+.hero-stats { display: flex; gap: 32px; flex-wrap: wrap; }
+.stat-val { font-family: var(--display); font-size: 26px; font-weight: 800; color: white; letter-spacing: -0.5px; }
+.stat-label { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+/* ─── PALETTE ─────────────────────────────────────── */
+.palette-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 28px;
+}
+@media (min-width: 600px) { .palette-row { grid-template-columns: repeat(6, 1fr); } }
+.swatch { border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.swatch-block { height: 64px; }
+.swatch-meta { padding: 10px 11px; background: white; }
+.swatch-name { font-family: var(--display); font-size: 11px; font-weight: 700; color: var(--dark); }
+.swatch-hex { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 1px; }
+.swatch-role { font-size: 10px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+/* ─── TYPE SPECIMENS ──────────────────────────────── */
+.type-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 700px) { .type-grid { grid-template-columns: 1fr 1fr 1fr; } }
+.type-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.type-role { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 14px; }
+.specimen-display { font-family: var(--display); font-size: 22px; font-weight: 800; color: var(--dark); letter-spacing: -0.3px; line-height: 1.2; margin-bottom: 8px; }
+.specimen-meta { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+
+/* ─── LOGO GRID ───────────────────────────────────── */
+.logo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.card-title { font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+.card-text { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.logo-samples { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0; }
+.logo-dark { background: #0F1623; padding: 14px 18px; border-radius: 10px; display: flex; align-items: center; gap: 10px; }
+.logo-light { background: #F7F4EF; padding: 14px 18px; border-radius: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); }
+.logo-wordmark { font-family: var(--display); font-size: 17px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+.logo-wordmark-dark { font-family: var(--display); font-size: 17px; font-weight: 800; color: var(--dark); letter-spacing: -0.3px; }
+.logo-wordmark em, .logo-wordmark-dark em { font-style: normal; color: var(--coral); }
+.sig-item { font-size: 12px; color: var(--muted); display: flex; gap: 8px; padding: 4px 0; line-height: 1.5; }
+.sig-arrow { color: var(--coral); flex-shrink: 0; }
+
+/* ─── TRUTH BOX ───────────────────────────────────── */
+.truth { background: var(--dark); border-radius: 12px; padding: 24px 24px 24px 28px; border-left: 3px solid var(--coral); margin-top: 24px; }
+.truth-title { font-family: var(--display); font-size: 14px; font-weight: 700; color: white; margin-bottom: 8px; }
+.truth-body { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.75; }
+
+/* ─── ARCHITECTURE ────────────────────────────────── */
+.arch { background: var(--night); border-radius: 14px; padding: 28px 20px; }
+.arch-portals { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px; }
+@media (min-width: 700px) { .arch-portals { grid-template-columns: repeat(3, 1fr); } }
+.portal-box { background: rgba(255,255,255,0.03); border-radius: 11px; padding: 20px; border: 1px solid rgba(255,255,255,0.07); }
+.portal-box.coral { border-color: rgba(232,113,74,0.3); background: rgba(232,113,74,0.04); }
+.portal-box.teal { border-color: rgba(14,144,128,0.3); background: rgba(14,144,128,0.04); }
+.portal-box.purple { border-color: rgba(107,92,231,0.3); background: rgba(107,92,231,0.04); }
+.portal-tag { display: inline-block; padding: 2px 10px; border-radius: 100px; font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.coral .portal-tag { background: var(--coral-lite); color: var(--coral); }
+.teal .portal-tag { background: var(--teal-lite); color: var(--teal); }
+.purple .portal-tag { background: var(--purple-lite); color: var(--purple); }
+.portal-name { font-family: var(--display); font-size: 16px; font-weight: 700; color: white; margin-bottom: 3px; }
+.portal-desc { font-size: 10px; color: rgba(255,255,255,0.38); margin-bottom: 14px; font-family: var(--mono); }
+.portal-features { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.portal-features li { font-size: 12px; color: rgba(255,255,255,0.55); display: flex; gap: 8px; align-items: flex-start; line-height: 1.5; }
+.portal-features li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.22); flex-shrink: 0; margin-top: 6px; }
+.arch-arrow { text-align: center; color: rgba(255,255,255,0.18); font-size: 16px; padding: 4px 0; }
+.arch-layer { background: rgba(107,92,231,0.07); border: 1px solid rgba(107,92,231,0.18); border-radius: 10px; padding: 14px 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.arch-layer.teal-layer { background: rgba(14,144,128,0.05); border-color: rgba(14,144,128,0.18); }
+.arch-layer-label { font-family: var(--mono); font-size: 9px; color: rgba(107,92,231,0.8); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; flex-shrink: 0; }
+.teal-layer .arch-layer-label { color: rgba(14,144,128,0.85); }
+.arch-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+.arch-pill { background: rgba(107,92,231,0.12); border: 1px solid rgba(107,92,231,0.2); color: rgba(170,160,255,0.9); font-family: var(--mono); font-size: 9px; padding: 3px 9px; border-radius: 100px; white-space: nowrap; }
+.arch-pill-teal { background: rgba(14,144,128,0.1); border: 1px solid rgba(14,144,128,0.2); color: rgba(100,220,200,0.9); font-family: var(--mono); font-size: 9px; padding: 3px 9px; border-radius: 100px; white-space: nowrap; }
+
+/* ─── ROLES ───────────────────────────────────────── */
+.roles-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 700px) { .roles-row { grid-template-columns: repeat(5, 1fr); } }
+.role-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 16px; transition: border-color 0.2s; }
+.role-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; margin-bottom: 10px; }
+.role-name { font-family: var(--display); font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
+.role-who { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.role-need { font-size: 11px; color: var(--muted); display: flex; gap: 5px; padding: 2px 0; line-height: 1.4; }
+.role-need::before { content: '→'; color: var(--coral); flex-shrink: 0; font-size: 10px; }
+
+/* ─── ONBOARDING FLOWS ────────────────────────────── */
+.flow-section { margin-bottom: 40px; }
+.flow-meta { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+.flow-icon { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+.flow-title { font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--dark); }
+.flow-subtitle { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+.flow-scroll { overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.flow-steps { display: flex; gap: 0; min-width: max-content; }
+.flow-step { width: 160px; background: white; border: 1px solid var(--border); border-right: none; padding: 14px 13px; flex-shrink: 0; }
+.flow-step:first-child { border-radius: 10px 0 0 10px; }
+.flow-step:last-child { border-radius: 0 10px 10px 0; border-right: 1px solid var(--border); }
+.step-n { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-bottom: 6px; letter-spacing: 1px; }
+.step-t { font-family: var(--display); font-size: 12px; font-weight: 700; color: var(--dark); margin-bottom: 4px; line-height: 1.3; }
+.step-d { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.step-flag { display: inline-block; margin-top: 7px; padding: 2px 7px; border-radius: 4px; font-size: 9px; font-family: var(--mono); }
+.flag-critical { background: var(--coral-lite); color: var(--coral); }
+.flag-magic { background: var(--teal-lite); color: var(--teal); }
+.flag-legal { background: rgba(201,150,42,0.1); color: #9A7020; }
+
+/* ─── SCREENS ─────────────────────────────────────── */
+.screens-pair { display: grid; grid-template-columns: 1fr; gap: 24px; }
+@media (min-width: 700px) { .screens-pair { grid-template-columns: 240px 1fr; align-items: start; } }
+.screen-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
+
+/* Phone frame */
+.phone { background: var(--dark); border-radius: 28px; padding: 12px; max-width: 220px; margin: 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,0.22); }
+.phone-notch { width: 56px; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 0 auto 8px; }
+.phone-screen { background: var(--warm); border-radius: 18px; padding: 13px 11px; min-height: 390px; }
+.app-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.app-greeting { font-family: var(--display); font-size: 12px; font-weight: 700; color: var(--dark); }
+.app-greeting-sub { font-size: 9px; color: var(--muted); font-family: var(--mono); }
+.app-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--coral); display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: 700; }
+.app-section-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 5px; }
+.community-card { background: white; border-radius: 9px; padding: 9px 10px; margin-bottom: 7px; border: 1px solid var(--border); }
+.community-name { font-family: var(--display); font-size: 11px; font-weight: 700; color: var(--dark); }
+.community-sub { font-size: 9px; color: var(--muted); font-family: var(--mono); margin-bottom: 5px; }
+.avatars { display: flex; }
+.av { width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid white; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: white; margin-left: -4px; }
+.av:first-child { margin-left: 0; }
+.av-extra { background: var(--border); color: var(--muted); }
+.event-card { background: var(--night); border-radius: 9px; padding: 9px 10px; margin-bottom: 5px; }
+.ev-type { font-family: var(--mono); font-size: 8px; color: var(--coral); text-transform: uppercase; margin-bottom: 2px; }
+.ev-title { font-family: var(--display); font-size: 11px; font-weight: 700; color: white; }
+.ev-loc { font-size: 9px; color: rgba(255,255,255,0.38); font-family: var(--mono); margin-bottom: 5px; }
+.rsvp-row { display: flex; gap: 4px; }
+.rsvp-btn { flex: 1; padding: 4px 0; border-radius: 5px; font-size: 9px; font-family: var(--mono); text-align: center; font-weight: 500; }
+.rsvp-going { background: var(--teal); color: white; }
+.rsvp-maybe { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.55); }
+.checkin-bar { background: var(--coral-lite); border: 1px solid var(--coral-mid); border-radius: 7px; padding: 7px 9px; margin-top: 7px; display: flex; align-items: center; justify-content: space-between; }
+.ci-title { font-size: 10px; font-weight: 600; color: var(--coral); font-family: var(--display); }
+.ci-sub { font-size: 8px; color: rgba(232,113,74,0.7); font-family: var(--mono); }
+.wellbeing-bar { background: rgba(14,144,128,0.08); border: 1px solid rgba(14,144,128,0.18); border-radius: 7px; padding: 6px 9px; margin-bottom: 9px; }
+.wb-text { font-size: 9px; color: var(--teal); font-family: var(--mono); }
+
+/* Dashboard frame */
+.dash { background: var(--dark); border-radius: 14px; padding: 7px; overflow: hidden; }
+.dash-chrome { display: flex; gap: 4px; padding: 4px 6px 6px; }
+.dash-dot { width: 8px; height: 8px; border-radius: 50%; }
+.dash-screen { background: #F0EDE8; border-radius: 9px; display: flex; overflow: hidden; min-height: 300px; }
+.dash-sidebar { width: 130px; background: var(--night); padding: 14px 10px; flex-shrink: 0; }
+.sidebar-logo { font-family: var(--display); font-size: 13px; font-weight: 800; color: white; margin-bottom: 18px; letter-spacing: -0.3px; }
+.sidebar-logo em { font-style: normal; color: var(--coral); }
+.sidebar-section-label { font-family: var(--mono); font-size: 8px; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; padding: 0 4px; margin-top: 10px; }
+.sidebar-item { font-size: 11px; color: rgba(255,255,255,0.45); padding: 5px 7px; border-radius: 6px; margin-bottom: 1px; display: flex; align-items: center; gap: 6px; }
+.sidebar-item::before { content: '·'; font-size: 14px; color: rgba(255,255,255,0.2); flex-shrink: 0; }
+.sidebar-item.active { background: rgba(255,255,255,0.08); color: white; }
+.sidebar-item.active::before { color: var(--coral); }
+.dash-main { flex: 1; padding: 14px; overflow: hidden; }
+.dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.dash-title { font-family: var(--display); font-size: 12px; font-weight: 700; color: var(--dark); }
+.kpi-btn { background: var(--coral); color: white; font-size: 9px; padding: 4px 9px; border-radius: 5px; font-family: var(--mono); white-space: nowrap; }
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
+.kpi-card { background: white; border: 1px solid var(--border); border-radius: 7px; padding: 8px; }
+.kpi-val { font-family: var(--display); font-size: 15px; font-weight: 800; color: var(--dark); letter-spacing: -0.5px; }
+.kpi-val.teal { color: var(--teal); }
+.kpi-val.alert { color: var(--coral); }
+.kpi-label { font-family: var(--mono); font-size: 8px; color: var(--muted); text-transform: uppercase; margin-top: 1px; }
+.kpi-trend { font-size: 8px; font-family: var(--mono); margin-top: 2px; color: var(--teal); }
+.kpi-trend.warn { color: var(--coral); }
+.patient-head { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4px; padding: 5px 7px; font-family: var(--mono); font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 3px; }
+.patient-row-dash { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4px; padding: 7px; background: white; border-radius: 5px; margin-bottom: 2px; align-items: center; border: 1px solid var(--border); }
+.p-name { font-size: 10px; font-weight: 600; color: var(--dark); }
+.p-demo { font-size: 8px; color: var(--muted); font-family: var(--mono); margin-top: 1px; }
+.risk-badge { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 8px; font-family: var(--mono); text-transform: uppercase; }
+.risk-hi { background: rgba(220,38,38,0.1); color: #B91C1C; }
+.risk-md { background: rgba(234,179,8,0.12); color: #92400E; }
+.risk-candidate { background: var(--coral-lite); color: var(--coral); }
+.p-phq { font-size: 10px; font-weight: 600; font-family: var(--mono); color: var(--dark); }
+.p-delta { font-size: 8px; font-family: var(--mono); color: var(--teal); }
+.p-delta-warn { color: #B91C1C; }
+.p-action { font-size: 8px; color: var(--coral); font-family: var(--mono); cursor: pointer; }
+.p-time { font-size: 8px; color: var(--muted); font-family: var(--mono); }
+
+/* Command center (full width, scrollable on mobile) */
+.command-wrap { overflow-x: auto; padding-bottom: 6px; }
+.command-inner { min-width: 640px; }
+.cmd-kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin-bottom: 10px; }
+.cmd-kpi { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+.cmd-kpi.alert-kpi { background: rgba(232,113,74,0.05); border-color: rgba(232,113,74,0.2); }
+.cmd-val { font-family: var(--display); font-size: 17px; font-weight: 800; color: var(--dark); letter-spacing: -0.5px; }
+.cmd-val.green { color: var(--teal); }
+.cmd-val.orange { color: var(--coral); }
+.cmd-label { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+.cmd-trend { font-size: 9px; color: var(--teal); font-family: var(--mono); margin-top: 3px; }
+.cmd-trend.warn { color: var(--coral); cursor: pointer; }
+.cohort-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.cohort-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+.cohort-card.new-cohort { background: rgba(107,92,231,0.04); border: 1px dashed rgba(107,92,231,0.3); cursor: pointer; display: flex; flex-direction: column; justify-content: center; }
+.c-name { font-size: 11px; font-weight: 700; color: var(--dark); font-family: var(--display); margin-bottom: 2px; }
+.c-name.purple { color: var(--purple); }
+.c-sub { font-size: 9px; color: var(--muted); font-family: var(--mono); margin-bottom: 7px; }
+.c-bar-track { background: #F0EDE8; border-radius: 3px; height: 4px; margin-bottom: 4px; overflow: hidden; }
+.c-bar-fill { height: 100%; background: var(--teal); border-radius: 3px; }
+.c-metric { font-size: 9px; color: var(--teal); font-family: var(--mono); }
+.c-metric.muted { color: var(--muted); }
+
+/* ─── POSITIONING ─────────────────────────────────── */
+.pos-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 700px) { .pos-grid { grid-template-columns: 1fr 1fr; } }
+.pos-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+.pos-title { font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 14px; }
+.tagline-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--warm); margin-bottom: 7px; }
+.tagline-row.preferred { background: rgba(14,144,128,0.05); border-color: rgba(14,144,128,0.22); }
+.tagline-text { font-family: var(--display); font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 3px; }
+.tagline-meta { font-size: 10px; color: var(--muted); font-family: var(--mono); line-height: 1.5; }
+.tagline-pick { font-size: 9px; font-family: var(--mono); background: var(--teal-lite); color: var(--teal); padding: 2px 7px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
+.vs-row { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.vs-row:last-child { border-bottom: none; }
+.vs-comp { font-size: 12px; font-weight: 600; color: var(--dark); min-width: 130px; flex-shrink: 0; }
+.vs-line { font-size: 11px; color: var(--muted); flex: 1; line-height: 1.5; }
+.vs-tag { font-size: 9px; font-family: var(--mono); background: var(--teal-lite); color: var(--teal); padding: 2px 7px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; }
+
+/* ICP Cards */
+.icp-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+@media (min-width: 700px) { .icp-grid { grid-template-columns: 1fr 1fr; } }
+
+/* ─── ROADMAP ─────────────────────────────────────── */
+.phases-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 700px) { .phases-grid { grid-template-columns: repeat(3, 1fr); } }
+.phase-card { border-radius: 12px; padding: 22px; border: 1px solid; }
+.phase-1 { background: rgba(232,113,74,0.05); border-color: rgba(232,113,74,0.2); }
+.phase-2 { background: rgba(14,144,128,0.05); border-color: rgba(14,144,128,0.2); }
+.phase-3 { background: rgba(107,92,231,0.05); border-color: rgba(107,92,231,0.2); }
+.phase-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.phase-1 .phase-label { color: var(--coral); }
+.phase-2 .phase-label { color: var(--teal); }
+.phase-3 .phase-label { color: var(--purple); }
+.phase-name { font-family: var(--display); font-size: 20px; font-weight: 700; color: var(--dark); margin-bottom: 3px; }
+.phase-timeline { font-size: 10px; color: var(--muted); font-family: var(--mono); margin-bottom: 14px; }
+.phase-item { display: flex; gap: 7px; font-size: 12px; color: var(--muted); padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.05); line-height: 1.5; }
+.phase-item:last-child { border-bottom: none; }
+.p-check { flex-shrink: 0; font-size: 10px; }
+.phase-1 .p-check { color: var(--coral); }
+.phase-2 .p-check { color: var(--teal); }
+.phase-3 .p-check { color: var(--purple); }
+
+/* ─── FOOTER ──────────────────────────────────────── */
+.doc-footer { background: var(--night); padding: 36px 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.footer-logo { font-family: var(--display); font-size: 16px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+.footer-logo em { font-style: normal; color: var(--coral); }
+.footer-meta { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.22); text-transform: uppercase; letter-spacing: 1px; }
+
+/* ─── UTILITY ─────────────────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 600px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+.mb-xs { margin-bottom: 8px; }
+.mb-sm { margin-bottom: 16px; }
+.mb-md { margin-bottom: 28px; }
+.mt-sm { margin-top: 16px; }
+.mt-md { margin-top: 28px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav class="nav">
+  <span class="nav-logo">Fi<em>Ti</em> Health</span>
+  <a class="nav-link" href="#brand">Brand</a>
+  <a class="nav-link" href="#platform">Platform</a>
+  <a class="nav-link" href="#roles">Roles</a>
+  <a class="nav-link" href="#onboarding">Onboarding</a>
+  <a class="nav-link" href="#screens">Screens</a>
+  <a class="nav-link" href="#positioning">Positioning</a>
+  <a class="nav-link" href="#roadmap">Roadmap</a>
+  <span class="nav-spacer"></span>
+  <span class="nav-badge">Blueprint v1</span>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<div class="hero">
+  <svg class="hero-rings" width="520" height="520" viewBox="0 0 520 520" aria-hidden="true">
+    <circle cx="260" cy="260" r="250" stroke="#E8714A" stroke-width="1" fill="none"/>
+    <circle cx="260" cy="260" r="200" stroke="#E8714A" stroke-width="1" fill="none"/>
+    <circle cx="260" cy="260" r="150" stroke="#E8714A" stroke-width="1" fill="none"/>
+    <circle cx="260" cy="260" r="100" stroke="#E8714A" stroke-width="1" fill="none"/>
+    <circle cx="260" cy="260" r="50" stroke="#E8714A" stroke-width="1" fill="none"/>
+  </svg>
+  <div class="hero-inner">
+    <div class="hero-pill">
+      <div class="hero-pill-dot"></div>
+      <span class="hero-pill-text">Platform Design Blueprint</span>
+    </div>
+    <h1>What FiTi <span class="accent">actually</span><br>needs to become.</h1>
+    <p class="hero-sub">Honest, comprehensive design brief covering brand system, product architecture, role-based onboarding, screen blueprints, and market positioning.</p>
+    <hr class="hero-divider">
+    <div class="hero-stats">
+      <div><div class="stat-val">3</div><div class="stat-label">Core products</div></div>
+      <div><div class="stat-val">5</div><div class="stat-label">User roles</div></div>
+      <div><div class="stat-val">Phase 1</div><div class="stat-label">MVP 4–6 months</div></div>
+      <div><div class="stat-val">Kenya</div><div class="stat-label">First market</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ BRAND ═══════════════ -->
+<section class="section" id="brand">
+  <div class="wrap">
+    <div class="eyebrow">01 — Brand Identity</div>
+    <h2 class="section-title">Stop looking like a wellness app.<br>Look like clinical infrastructure.</h2>
+    <p class="section-lead">The current dark purple gradient reads "mental health startup." FiTi's buyers are CMOs and VP Population Health officers. The new system needs to read: precise, trusted, and undeniably human — simultaneously.</p>
+
+    <!-- PALETTE -->
+    <div class="eyebrow mb-xs">Color System</div>
+    <div class="palette-row mb-md">
+      <div class="swatch">
+        <div class="swatch-block" style="background:#0F1623;"></div>
+        <div class="swatch-meta"><div class="swatch-name">Midnight</div><div class="swatch-hex">#0F1623</div><div class="swatch-role">Dark surfaces, nav, enterprise UI</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-block" style="background:#E8714A;"></div>
+        <div class="swatch-meta"><div class="swatch-name">FiTi Coral</div><div class="swatch-hex">#E8714A</div><div class="swatch-role">Primary brand, CTAs, human warmth</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-block" style="background:#0E9080;"></div>
+        <div class="swatch-meta"><div class="swatch-name">FiTi Teal</div><div class="swatch-hex">#0E9080</div><div class="swatch-role">Clinical health, success, validation</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-block" style="background:#6B5CE7;"></div>
+        <div class="swatch-meta"><div class="swatch-name">FiTi Violet</div><div class="swatch-hex">#6B5CE7</div><div class="swatch-role">AI layer, algorithm, intelligence</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-block" style="background:#F7F4EF; border:1px solid #E2E8F0;"></div>
+        <div class="swatch-meta"><div class="swatch-name">FiTi Warm</div><div class="swatch-hex">#F7F4EF</div><div class="swatch-role">Page backgrounds, warmth</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-block" style="background:#6B7A96;"></div>
+        <div class="swatch-meta"><div class="swatch-name">Muted</div><div class="swatch-hex">#6B7A96</div><div class="swatch-role">Secondary text, labels, metadata</div></div>
+      </div>
+    </div>
+
+    <!-- TYPOGRAPHY -->
+    <div class="eyebrow mb-xs">Type System</div>
+    <div class="type-grid mb-md">
+      <div class="type-card">
+        <div class="type-role">Display / Headlines — Plus Jakarta Sans</div>
+        <div class="specimen-display">Operationalizing<br>Social Health</div>
+        <div class="specimen-meta">800 weight · −0.5px tracking · Clinical but human</div>
+      </div>
+      <div class="type-card">
+        <div class="type-role">Body / Interface — Inter</div>
+        <div style="font-family:'Inter',sans-serif;font-size:13px;color:#1A2336;line-height:1.75;margin-bottom:8px;">We analyze behavioral patterns — not personal content. Your messages, location history, and private data remain entirely on your device.</div>
+        <div class="specimen-meta">400/500 weight · 14px base · 1.7 line-height</div>
+      </div>
+      <div class="type-card">
+        <div class="type-role">Data / Labels — IBM Plex Mono</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#1A2336;line-height:1.9;">PHQ-9: 14 → 8 <span style="color:#0E9080;">↓43%</span><br>Isolation Score: 72 → 48<br>Last event: 3 days ago<br>Cohort: ANXIETY_A · NBI</div>
+        <div class="specimen-meta" style="margin-top:8px;">400/500 weight · Numbers, metrics, IDs, labels</div>
+      </div>
+    </div>
+
+    <!-- LOGO -->
+    <div class="eyebrow mb-xs">Logo & Signature Element</div>
+    <div class="logo-grid">
+      <div class="card">
+        <div class="card-title">Logo Mark — Proximity Rings</div>
+        <div class="logo-samples">
+          <div class="logo-dark">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <circle cx="12" cy="16" r="10" stroke="#E8714A" stroke-width="2.5"/>
+              <circle cx="22" cy="16" r="10" stroke="white" stroke-width="2.5"/>
+            </svg>
+            <span class="logo-wordmark">Fi<em>Ti</em></span>
+          </div>
+          <div class="logo-light">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <circle cx="12" cy="16" r="10" stroke="#E8714A" stroke-width="2.5"/>
+              <circle cx="22" cy="16" r="10" stroke="#1A2336" stroke-width="2.5"/>
+            </svg>
+            <span class="logo-wordmark-dark">Fi<em>Ti</em></span>
+          </div>
+        </div>
+        <div class="card-text">Two overlapping rings = two people forming a connection. The intersection is the community. Simple, scalable to small sizes, and meaningful — it's the product metaphor made visible.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Where Proximity Rings Appear</div>
+        <div class="card-text" style="margin-bottom:10px;">This is FiTi's signature element — concentric rings representing closeness. Communities form through overlap. It appears across every touchpoint:</div>
+        <div class="sig-item"><span class="sig-arrow">→</span>Hero and landing page background texture</div>
+        <div class="sig-item"><span class="sig-arrow">→</span>Community match reveal animation in the patient app</div>
+        <div class="sig-item"><span class="sig-arrow">→</span>Loading/processing states (expanding rings)</div>
+        <div class="sig-item"><span class="sig-arrow">→</span>Match quality score (overlap depth = match strength)</div>
+        <div class="sig-item"><span class="sig-arrow">→</span>Population health map overlays in Command dashboard</div>
+      </div>
+    </div>
+
+    <div class="truth">
+      <div class="truth-title">⚡ Brutal Design Truth</div>
+      <div class="truth-body">The current dark purple gradient is differentiated, but it reads "ambient wellness startup" — the same aesthetic as a sleep tracker or meditation app. FiTi is selling population health infrastructure to CMOs. Their other software looks like Epic, Salesforce, and Tableau. The new brand needs to feel like a premium B2B data platform that genuinely cares about humans — not a consumer app with a B2B pitch deck stapled on. Coral as the primary brand color breaks healthcare convention deliberately: it signals warmth without sacrificing authority.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════ PLATFORM ═══════════════ -->
+<section class="section" id="platform">
+  <div class="wrap">
+    <div class="eyebrow">02 — Platform Architecture</div>
+    <h2 class="section-title">Three products.<br>One data layer.</h2>
+    <p class="section-lead">FiTi is not one app. It's three deeply integrated products for three different audiences — named distinctly because each buyer needs to feel the product was built for them.</p>
+
+    <div class="arch">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:8px;">
+        <span style="font-family:var(--display);font-size:14px;font-weight:700;color:white;">Platform Architecture</span>
+        <span style="font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:1px;">FiTi Health v1</span>
+      </div>
+      <div class="arch-portals">
+        <div class="portal-box coral">
+          <div class="portal-tag">Patient-Facing</div>
+          <div class="portal-name">FiTi Connect</div>
+          <div class="portal-desc">iOS + Android · Member Mobile App</div>
+          <ul class="portal-features">
+            <li>Community match reveal & onboarding</li>
+            <li>Event calendar + one-tap RSVP + GPS check-in</li>
+            <li>Group chat (no private DMs — safety by design)</li>
+            <li>PHQ-9 / UCLA-3 check-ins every 2 weeks</li>
+            <li>AI companion nudges (motivational, not clinical)</li>
+            <li>Isolation score trend (private to patient only)</li>
+            <li>Activity feed, attendance streaks</li>
+          </ul>
+        </div>
+        <div class="portal-box teal">
+          <div class="portal-tag">Clinical</div>
+          <div class="portal-name">FiTi Clinical</div>
+          <div class="portal-desc">Web App · Clinicians & Care Teams</div>
+          <ul class="portal-features">
+            <li>Patient list with isolation risk stratification</li>
+            <li>FiTi e-prescription in &lt;30 seconds</li>
+            <li>PHQ-9 trend charts per patient</li>
+            <li>Escalation alerts when isolation spikes</li>
+            <li>FHIR bi-directional Epic/Cerner sync</li>
+            <li>One-click referral to social prescriber</li>
+            <li>Completion dashboard for care team</li>
+          </ul>
+        </div>
+        <div class="portal-box purple">
+          <div class="portal-tag">Admin & Analytics</div>
+          <div class="portal-name">FiTi Command</div>
+          <div class="portal-desc">Web App · Admins, Payers, Health Systems</div>
+          <ul class="portal-features">
+            <li>Population health overview with risk map</li>
+            <li>Cohort management & enrollment workflows</li>
+            <li>Intervention protocol configuration</li>
+            <li>ROI & utilization reporting (export to PDF/XLS)</li>
+            <li>Claims data integration (payer analytics layer)</li>
+            <li>HEDIS measure tracking</li>
+            <li>IRB-ready outcome reports</li>
+          </ul>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer">
+        <div class="arch-layer-label">Core Data Layer</div>
+        <div class="arch-pills">
+          <span class="arch-pill">Behavioral signals</span>
+          <span class="arch-pill">PHQ-9 / UCLA-3 scores</span>
+          <span class="arch-pill">Event attendance</span>
+          <span class="arch-pill">Cohort matching engine</span>
+          <span class="arch-pill">Isolation risk model</span>
+          <span class="arch-pill">HIPAA-encrypted store</span>
+          <span class="arch-pill">FHIR R4 API</span>
+          <span class="arch-pill">Differential privacy layer</span>
+        </div>
+      </div>
+      <div class="arch-arrow">↓</div>
+      <div class="arch-layer teal-layer">
+        <div class="arch-layer-label">Integrations</div>
+        <div class="arch-pills">
+          <span class="arch-pill-teal">Apple HealthKit</span>
+          <span class="arch-pill-teal">Google Fit</span>
+          <span class="arch-pill-teal">Epic EHR (FHIR)</span>
+          <span class="arch-pill-teal">Cerner</span>
+          <span class="arch-pill-teal">NHIF (Kenya)</span>
+          <span class="arch-pill-teal">Africa's Talking SMS</span>
+          <span class="arch-pill-teal">WhatsApp Business API</span>
+          <span class="arch-pill-teal">DocuSign (BAA)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="truth">
+      <div class="truth-title">⚡ Critical Architecture Note on "Passive Sensing"</div>
+      <div class="truth-body">The passive sensing described on the current website — raw location access, call log density, communication patterns — is Phase 3 technology requiring deep OS integration that iOS and Android actively restrict. For Phase 1, behavioral signals should come from Apple HealthKit and Google Fit (step count, movement patterns, sleep regularity) combined with in-app engagement data. HealthKit and Google Fit are privacy-compliant, already trusted by users, and give you 80% of the clinical signal with 5% of the engineering complexity. Build that first. Passive sensing is a moat you earn once you have clinical evidence — not the foundation you start with.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════ ROLES ═══════════════ -->
+<section class="section" id="roles">
+  <div class="wrap">
+    <div class="eyebrow">03 — User Roles</div>
+    <h2 class="section-title">Five users.<br>Five different worlds.</h2>
+    <p class="section-lead">Most healthcare platforms fail because they design one UI for all stakeholders. FiTi has five distinct user types — each needs a product that feels built specifically for how they work.</p>
+
+    <div class="roles-row">
+      <div class="role-card">
+        <div class="role-icon" style="background:rgba(232,113,74,0.12);">🧑‍🤝‍🧑</div>
+        <div class="role-name">Member</div>
+        <div class="role-who">Patient · App User</div>
+        <div class="role-need">Find community, not treatment</div>
+        <div class="role-need">Feel safe and never stigmatized</div>
+        <div class="role-need">Simple one-tap RSVP to events</div>
+        <div class="role-need">See their own progress privately</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon" style="background:rgba(14,144,128,0.1);">🩺</div>
+        <div class="role-name">Clinician</div>
+        <div class="role-who">GP · Psychiatrist · SW</div>
+        <div class="role-need">Prescribe FiTi in under 30 sec</div>
+        <div class="role-need">See patient risk at a glance</div>
+        <div class="role-need">Alerts when patients deteriorate</div>
+        <div class="role-need">Works within their EHR flow</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon" style="background:rgba(107,92,231,0.1);">📊</div>
+        <div class="role-name">Admin</div>
+        <div class="role-who">Pop. Health Manager · CMO</div>
+        <div class="role-need">Population-level outcome view</div>
+        <div class="role-need">Enrollment & cohort management</div>
+        <div class="role-need">Exportable reports for committees</div>
+        <div class="role-need">ROI documentation for the CFO</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon" style="background:rgba(201,150,42,0.12);">🤝</div>
+        <div class="role-name">Link Worker</div>
+        <div class="role-who">Community Facilitator</div>
+        <div class="role-need">Manage their assigned cohorts</div>
+        <div class="role-need">Track attendance per event</div>
+        <div class="role-need">Activity planning templates</div>
+        <div class="role-need">Flag members needing support</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon" style="background:rgba(14,144,128,0.08);">💰</div>
+        <div class="role-name">Payer</div>
+        <div class="role-who">Insurer · Employer · Plan</div>
+        <div class="role-need">ER visit + readmission data</div>
+        <div class="role-need">HEDIS measure improvements</div>
+        <div class="role-need">Claims correlation analysis</div>
+        <div class="role-need">Actuarial support for contracts</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════ ONBOARDING ═══════════════ -->
+<section class="section" id="onboarding">
+  <div class="wrap">
+    <div class="eyebrow">04 — Onboarding Flows</div>
+    <h2 class="section-title">First impressions<br>make or break pilots.</h2>
+    <p class="section-lead">Each role has a completely different first-run experience. The patient flow is the most critical — it must feel like joining a community, never like entering a mental health program. Scroll each flow horizontally.</p>
+
+    <!-- PATIENT -->
+    <div class="flow-section">
+      <div class="flow-meta">
+        <div class="flow-icon" style="background:rgba(232,113,74,0.12);">🧑‍🤝‍🧑</div>
+        <div>
+          <div class="flow-title">Member Onboarding (FiTi Connect)</div>
+          <div class="flow-subtitle">Most critical · Must not feel clinical · Designed for activation, not compliance</div>
+        </div>
+      </div>
+      <div class="flow-scroll">
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-n">Step 01</div>
+            <div class="step-t">Warm Invitation</div>
+            <div class="step-d">"Dr. Kamau recommended the FiTi Community Program for you." Doctor's name is shown. Never mentions mental health or treatment.</div>
+            <span class="step-flag flag-critical">Non-stigmatizing</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 02</div>
+            <div class="step-t">What Brings You Here</div>
+            <div class="step-d">5 tappable cards. No clinical framing. "I want more social connection," "I've been feeling a bit isolated," "My doctor suggested it," etc.</div>
+            <span class="step-flag flag-critical">No clinical framing</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 03</div>
+            <div class="step-t">Interest Survey</div>
+            <div class="step-d">Visual illustrated grid. Hiking, Coffee, Books, Cooking, Music, Volunteering, Markets, Fitness… Tap to select. No wrong answers.</div>
+            <span class="step-flag flag-magic">High engagement</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 04</div>
+            <div class="step-t">Availability</div>
+            <div class="step-d">Simple calendar-style grid. Weekday mornings, evenings, weekend slots. One tap per block. Designed for people with irregular schedules.</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 05</div>
+            <div class="step-t">Privacy Setup</div>
+            <div class="step-d">Explicit opt-in for each signal type. Toggle with plain English. "Allow movement data from Apple Health? This helps us understand your activity." HIPAA consent here.</div>
+            <span class="step-flag flag-legal">Legal consent gate</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 06</div>
+            <div class="step-t">The Magic Moment ✨</div>
+            <div class="step-d">Animated proximity rings expand outward. Names appear. "You've been matched with 9 people in your area who share your interests." This is the product's defining moment.</div>
+            <span class="step-flag flag-magic">Signature moment</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 07</div>
+            <div class="step-t">First Event RSVP</div>
+            <div class="step-d">Immediately shown an upcoming event for their cohort. One-tap RSVP. Creates behavioral commitment before the user leaves onboarding. Critical for retention.</div>
+            <span class="step-flag flag-critical">Activation lock-in</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 08</div>
+            <div class="step-t">Meet the Community</div>
+            <div class="step-d">Async intro wall. Each member has an avatar + 3 interest tags. No pressure to message. Group intro thread already started by facilitator.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLINICIAN -->
+    <div class="flow-section">
+      <div class="flow-meta">
+        <div class="flow-icon" style="background:rgba(14,144,128,0.1);">🩺</div>
+        <div>
+          <div class="flow-title">Clinician Onboarding (FiTi Clinical)</div>
+          <div class="flow-subtitle">Must take &lt;10 minutes · EHR-first · Minimum behavior change required</div>
+        </div>
+      </div>
+      <div class="flow-scroll">
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-n">Step 01</div>
+            <div class="step-t">SSO Login</div>
+            <div class="step-d">Login via hospital SSO or email. No new password required. One click from EHR smart button if Epic/Cerner integration is live.</div>
+            <span class="step-flag flag-critical">Zero new friction</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 02</div>
+            <div class="step-t">Patient Import</div>
+            <div class="step-d">CSV upload or FHIR sync. System pre-populates patient list. Clinician reviews and confirms. Takes 2 minutes max.</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 03</div>
+            <div class="step-t">5-Min Training</div>
+            <div class="step-d">Async video walkthrough: how to read isolation scores, how to e-prescribe FiTi, when to escalate. Completable on mobile during commute.</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 04</div>
+            <div class="step-t">First Prescription</div>
+            <div class="step-d">Select a patient with high isolation score. Click "Prescribe FiTi." Customize optional message. Patient receives invitation. This is the first value moment.</div>
+            <span class="step-flag flag-magic">First value moment</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 05</div>
+            <div class="step-t">Alert Config</div>
+            <div class="step-d">Set thresholds: "Alert me if isolation score spikes by X% or PHQ-9 worsens by Y points." Choose delivery: email or push notification.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="flow-section">
+      <div class="flow-meta">
+        <div class="flow-icon" style="background:rgba(107,92,231,0.1);">📊</div>
+        <div>
+          <div class="flow-title">Admin / Health System (FiTi Command)</div>
+          <div class="flow-subtitle">Formal setup process · Legal before everything · IT will be a bottleneck — plan for it</div>
+        </div>
+      </div>
+      <div class="flow-scroll">
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-n">Step 01</div>
+            <div class="step-t">BAA Execution</div>
+            <div class="step-d">Digital signature via DocuSign. HIPAA Business Associate Agreement legally required before any PHI is shared. Cannot be skipped or delayed.</div>
+            <span class="step-flag flag-legal">Legal gate</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 02</div>
+            <div class="step-t">Org Setup</div>
+            <div class="step-d">Name, logo, location(s), clinical contact. White-label branding for patient app if purchased on Health System tier.</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 03</div>
+            <div class="step-t">Integration Config</div>
+            <div class="step-d">Connect EHR FHIR endpoint. Guided wizard. Technical lead from IT required. Usually 1–3 days. This is almost always the bottleneck — surface it early.</div>
+            <span class="step-flag flag-critical">IT bottleneck</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 04</div>
+            <div class="step-t">Population Criteria</div>
+            <div class="step-d">Define pilot population by age range, ICD-10 codes (F32, F41, Z60.x), risk scores. FiTi suggests evidence-based defaults to reduce decision fatigue.</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 05</div>
+            <div class="step-t">Protocol Selection</div>
+            <div class="step-d">Choose intervention templates: community type (structured/organic), event frequency, facilitator model, outcome measurement cadence.</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-n">Step 06</div>
+            <div class="step-t">Launch Cohort</div>
+            <div class="step-d">Upload enrollment list. System forms initial cohorts. Admin reviews matching quality and approves. Invitations sent to patients. Program is live.</div>
+            <span class="step-flag flag-magic">First patients live</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════ SCREENS ═══════════════ -->
+<section class="section" id="screens">
+  <div class="wrap">
+    <div class="eyebrow">05 — Screen Blueprints</div>
+    <h2 class="section-title">What the screens<br>actually need to show.</h2>
+    <p class="section-lead">Wireframe-level blueprints showing information hierarchy, key UI patterns, and design decisions for the three most important screens in the product.</p>
+
+    <!-- MOBILE + CLINICAL SIDE BY SIDE -->
+    <div class="screens-pair mb-md">
+      <div>
+        <div class="screen-label">FiTi Connect · Home Screen (Mobile)</div>
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="app-bar">
+              <div>
+                <div class="app-greeting">Good morning, Sarah ☀</div>
+                <div class="app-greeting-sub">Monday · Jun 22</div>
+              </div>
+              <div class="app-avatar">S</div>
+            </div>
+            <div class="wellbeing-bar">
+              <div class="wb-text">↑ Social health trending up this week</div>
+            </div>
+            <div class="app-section-label">YOUR COMMUNITY</div>
+            <div class="community-card">
+              <div class="community-name">Cohort A · Nairobi West</div>
+              <div class="community-sub">9 members · Since April 2025</div>
+              <div class="avatars">
+                <div class="av" style="background:#E8714A;">J</div>
+                <div class="av" style="background:#0E9080;">P</div>
+                <div class="av" style="background:#6B5CE7;">M</div>
+                <div class="av" style="background:#C9962A;">K</div>
+                <div class="av av-extra">+5</div>
+              </div>
+            </div>
+            <div class="app-section-label" style="margin-top:8px;">THIS WEEK</div>
+            <div class="event-card">
+              <div class="ev-type">Tomorrow · 7:00 AM</div>
+              <div class="ev-title">☕ Morning Coffee Walk</div>
+              <div class="ev-loc">Karura Forest, Nairobi</div>
+              <div class="rsvp-row">
+                <div class="rsvp-btn rsvp-going">✓ Going</div>
+                <div class="rsvp-btn rsvp-maybe">Maybe</div>
+              </div>
+            </div>
+            <div class="event-card" style="background:rgba(255,255,255,0.06);">
+              <div class="ev-type">Wed · 6:30 PM</div>
+              <div class="ev-title">📚 Book Club · Round 3</div>
+              <div class="ev-loc">Village Market, Gigiri</div>
+              <div class="rsvp-row">
+                <div class="rsvp-btn rsvp-maybe">Going</div>
+                <div class="rsvp-btn rsvp-maybe">Maybe</div>
+              </div>
+            </div>
+            <div class="checkin-bar">
+              <div>
+                <div class="ci-title">Quick check-in due</div>
+                <div class="ci-sub">3 questions · 60 seconds</div>
+              </div>
+              <span style="font-size:12px;color:var(--coral);">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="screen-label">FiTi Clinical · Patient List (Web)</div>
+        <div class="dash">
+          <div class="dash-chrome">
+            <div class="dash-dot" style="background:#FF5F57;"></div>
+            <div class="dash-dot" style="background:#FFBD2E;"></div>
+            <div class="dash-dot" style="background:#28C840;"></div>
+          </div>
+          <div class="dash-screen">
+            <div class="dash-sidebar">
+              <div class="sidebar-logo">Fi<em>Ti</em> Clinical</div>
+              <div class="sidebar-section-label">Overview</div>
+              <div class="sidebar-item active">Patients</div>
+              <div class="sidebar-item">Cohorts</div>
+              <div class="sidebar-item">Alerts <span style="margin-left:4px;background:var(--coral);color:white;font-size:8px;padding:0 4px;border-radius:3px;">3</span></div>
+              <div class="sidebar-section-label">Reports</div>
+              <div class="sidebar-item">Outcomes</div>
+              <div class="sidebar-item">Export</div>
+              <div class="sidebar-section-label">Settings</div>
+              <div class="sidebar-item">Alert Config</div>
+              <div class="sidebar-item">Integration</div>
+            </div>
+            <div class="dash-main">
+              <div class="dash-header">
+                <div class="dash-title">Patients · 42 enrolled</div>
+                <div class="kpi-btn">+ Prescribe FiTi</div>
+              </div>
+              <div class="kpi-row">
+                <div class="kpi-card"><div class="kpi-val">42</div><div class="kpi-label">Enrolled</div><div class="kpi-trend">↑ 4 this week</div></div>
+                <div class="kpi-card"><div class="kpi-val">73%</div><div class="kpi-label">Active</div><div class="kpi-trend">↑ 8% vs last mo</div></div>
+                <div class="kpi-card"><div class="kpi-val teal">−34%</div><div class="kpi-label">Avg PHQ-9</div><div class="kpi-trend">Improving</div></div>
+                <div class="kpi-card"><div class="kpi-val alert">3</div><div class="kpi-label">Alerts</div><div class="kpi-trend warn">Needs review</div></div>
+              </div>
+              <div class="patient-head"><div>Patient</div><div>Risk</div><div>PHQ-9</div><div>Last Active</div></div>
+              <div class="patient-row-dash">
+                <div><div class="p-name">Sarah M.</div><div class="p-demo">F · 34 · Anxiety</div></div>
+                <div><span class="risk-badge risk-hi">High</span></div>
+                <div><div class="p-phq">14 → 8</div><div class="p-delta">↓ 43% ✓</div></div>
+                <div class="p-time">3d ago</div>
+              </div>
+              <div class="patient-row-dash">
+                <div><div class="p-name">James K.</div><div class="p-demo">M · 28 · Depression</div></div>
+                <div><span class="risk-badge risk-md">Medium</span></div>
+                <div><div class="p-phq">11 → 9</div><div class="p-delta">↓ 18%</div></div>
+                <div class="p-time">1d ago</div>
+              </div>
+              <div class="patient-row-dash">
+                <div><div class="p-name">Patricia R.</div><div class="p-demo">F · 61 · Isolation</div></div>
+                <div><span class="risk-badge risk-hi">⚠ Alert</span></div>
+                <div><div class="p-phq">17</div><div class="p-delta p-delta-warn">No change</div></div>
+                <div class="p-time" style="color:#B91C1C;">8d ago</div>
+              </div>
+              <div class="patient-row-dash" style="border-style:dashed;background:rgba(232,113,74,0.03);">
+                <div><div class="p-name" style="color:var(--muted);">Maria L.</div><div class="p-demo">F · 45 · Not enrolled</div></div>
+                <div><span class="risk-badge risk-candidate">Candidate</span></div>
+                <div><div class="p-phq">16</div><div class="p-delta" style="color:var(--coral);">New flag</div></div>
+                <div class="p-action">Prescribe →</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMAND CENTER (full width, scrollable) -->
+    <div class="screen-label">FiTi Command · Population Health Dashboard (Admin / Health System)</div>
+    <div class="dash">
+      <div class="dash-chrome">
+        <div class="dash-dot" style="background:#FF5F57;"></div>
+        <div class="dash-dot" style="background:#FFBD2E;"></div>
+        <div class="dash-dot" style="background:#28C840;"></div>
+      </div>
+      <div style="background:#F0EDE8;border-radius:9px;padding:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div style="font-family:var(--display);font-size:13px;font-weight:700;color:var(--dark);">FiTi Command · Nairobi Hospital · Week of Jun 22, 2025</div>
+          <div style="display:flex;gap:6px;">
+            <div style="font-size:10px;font-family:var(--mono);padding:4px 10px;background:white;border:1px solid var(--border);border-radius:6px;color:var(--muted);">Export Report</div>
+            <div style="font-size:10px;font-family:var(--mono);padding:4px 10px;background:var(--teal);color:white;border-radius:6px;">+ Enroll Cohort</div>
+          </div>
+        </div>
+        <div class="command-wrap">
+          <div class="command-inner">
+            <div class="cmd-kpis">
+              <div class="cmd-kpi"><div class="cmd-val">247</div><div class="cmd-label">Enrolled</div><div class="cmd-trend">↑ 18 this month</div></div>
+              <div class="cmd-kpi"><div class="cmd-val">78%</div><div class="cmd-label">Event Attendance</div><div class="cmd-trend">↑ vs 71% last mo</div></div>
+              <div class="cmd-kpi"><div class="cmd-val green">−38%</div><div class="cmd-label">Avg PHQ-9 Change</div><div class="cmd-trend">8-week average</div></div>
+              <div class="cmd-kpi"><div class="cmd-val">KES 4.2M</div><div class="cmd-label">Projected Savings</div><div class="cmd-trend">Annualized est.</div></div>
+              <div class="cmd-kpi alert-kpi"><div class="cmd-val orange">7</div><div class="cmd-label">At-Risk Alerts</div><div class="cmd-trend warn">Review now →</div></div>
+            </div>
+            <div class="cohort-grid">
+              <div class="cohort-card">
+                <div class="c-name">Cohort A · Anxiety</div>
+                <div class="c-sub">11 members · Wk 6 / 8</div>
+                <div class="c-bar-track"><div class="c-bar-fill" style="width:75%;"></div></div>
+                <div class="c-metric">−41% avg PHQ-9</div>
+              </div>
+              <div class="cohort-card">
+                <div class="c-name">Cohort B · Isolation</div>
+                <div class="c-sub">9 members · Wk 3 / 8</div>
+                <div class="c-bar-track"><div class="c-bar-fill" style="width:37%;"></div></div>
+                <div class="c-metric">−22% avg UCLA-3</div>
+              </div>
+              <div class="cohort-card">
+                <div class="c-name">Cohort C · Depression</div>
+                <div class="c-sub">10 members · Wk 7 / 8</div>
+                <div class="c-bar-track"><div class="c-bar-fill" style="width:87%;"></div></div>
+                <div class="c-metric">−35% avg PHQ-9 ✓</div>
+              </div>
+              <div class="cohort-card new-cohort">
+                <div class="c-name purple">+ New Cohort</div>
+                <div class="c-sub" style="color:rgba(107,92,231,0.6);">27 patients eligible</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════ POSITIONING ═══════════════ -->
+<section class="section" id="positioning">
+  <div class="wrap">
+    <div class="eyebrow">06 — Market Positioning</div>
+    <h2 class="section-title">What FiTi is, what it isn't,<br>and how to say it in a boardroom.</h2>
+    <p class="section-lead">B2B healthcare buying decisions happen in boardrooms, not app stores. The language needs to match where decisions get made. The current site tries to be everything — and ends up being specific to no one.</p>
+
+    <div class="pos-grid">
+      <div class="pos-card">
+        <div class="pos-title">Tagline Options — Ranked</div>
+        <div class="tagline-row">
+          <div>
+            <div class="tagline-text">"Operationalizing Social Health at Scale."</div>
+            <div class="tagline-meta">Current tagline · Too jargony · Who outside healthcare ops uses "operationalizing"?</div>
+          </div>
+        </div>
+        <div class="tagline-row preferred">
+          <div style="flex:1;">
+            <div class="tagline-text">"Turn community into clinical evidence."</div>
+            <div class="tagline-meta">Recommended · Bridges clinical and human · Speaks to payers, systems, and media</div>
+          </div>
+          <div class="tagline-pick">↑ Use this</div>
+        </div>
+        <div class="tagline-row preferred">
+          <div style="flex:1;">
+            <div class="tagline-text">"Social prescribing, at scale, with proof."</div>
+            <div class="tagline-meta">Strong for healthcare system audiences who know the term "social prescribing"</div>
+          </div>
+          <div class="tagline-pick">↑ Or this</div>
+        </div>
+        <div class="tagline-row">
+          <div>
+            <div class="tagline-text">"The clinical infrastructure for social health."</div>
+            <div class="tagline-meta">Best for IT, procurement, and technical audiences during sales cycles</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pos-card">
+        <div class="pos-title">Competitive Positioning</div>
+        <div class="vs-row">
+          <div class="vs-comp">BetterHelp / Headspace</div>
+          <div class="vs-line">Consumer therapy and mindfulness. No B2B clinical validation, no community formation, no outcomes reporting for payers.</div>
+          <div class="vs-tag">Not FiTi</div>
+        </div>
+        <div class="vs-row">
+          <div class="vs-comp">Epic EHR modules</div>
+          <div class="vs-line">Lives inside the hospital. FiTi takes patients outside into real-world community. EHR cannot do that.</div>
+          <div class="vs-tag">Complementary</div>
+        </div>
+        <div class="vs-row">
+          <div class="vs-comp">Wellframe / Carebook</div>
+          <div class="vs-line">Digital care management — good at adherence, not designed for community formation or social isolation measurement.</div>
+          <div class="vs-tag">Different lane</div>
+        </div>
+        <div class="vs-row">
+          <div class="vs-comp">Meetup / Facebook Groups</div>
+          <div class="vs-line">No clinical measurement, no HIPAA, no outcomes reporting. Consumer, not clinical infrastructure.</div>
+          <div class="vs-tag">Not comparable</div>
+        </div>
+        <div class="vs-row">
+          <div class="vs-comp">No solution (inaction)</div>
+          <div class="vs-line">Every lonely patient costs $1,600+/yr in excess spend. This is FiTi's real competition — status quo inertia.</div>
+          <div class="vs-tag">Primary win case</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="icp-grid">
+      <div class="card">
+        <div class="card-title">🇰🇪 Ideal First Customer — Kenya</div>
+        <div class="card-text">A Nairobi-based private hospital or employer-sponsored health plan (AAR, Jubilee, Resolution Health) with a population health mandate willing to run a 6-month pilot with 100–300 patients. Decision-maker: Medical Director or Head of Wellness. Value proposition: lower mental health claims, better member satisfaction, differentiated benefit. Clinical evidence from this pilot becomes the global pitch deck and the peer-reviewed paper.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🇺🇸 Ideal First Customer — US</div>
+        <div class="card-text">A mid-size regional health system or Accountable Care Organization under value-based care contracts, with an existing behavioral health program looking to add a social health module. Buyer: CMO or VP Population Health. IRB pilot data from Kenya accelerates the US conversation from "interesting concept" to "let's see your outcomes data." SOC2 Type II certification is a pre-requisite for most US health system procurement.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════ ROADMAP ═══════════════ -->
+<section class="section" id="roadmap">
+  <div class="wrap">
+    <div class="eyebrow">07 — Build Roadmap</div>
+    <h2 class="section-title">What to actually build.<br>In what order.</h2>
+    <p class="section-lead">The current site implies a complete platform. What's needed next is the minimum product to run one real pilot with one real organization and collect real PHQ-9 outcomes. Everything else is secondary to that.</p>
+
+    <div class="phases-grid">
+      <div class="phase-card phase-1">
+        <div class="phase-label">Phase 1</div>
+        <div class="phase-name">Prove It</div>
+        <div class="phase-timeline">Months 1–5 · Kenya pilot · Real clinical data</div>
+        <div class="phase-item"><span class="p-check">●</span>Patient iOS app — interest survey, match reveal, event RSVP, group chat, PHQ-9 check-in (biweekly)</div>
+        <div class="phase-item"><span class="p-check">●</span>Apple HealthKit signal integration (movement, steps — NOT raw OS sensing)</div>
+        <div class="phase-item"><span class="p-check">●</span>Admin web portal — enrollment, cohort management, basic outcome tracking, CSV export</div>
+        <div class="phase-item"><span class="p-check">●</span>Clinician view (basic) — patient list with risk scores, manual FiTi invitation send</div>
+        <div class="phase-item"><span class="p-check">●</span>IRB protocol submitted with Nairobi Hospital or AAR Health</div>
+        <div class="phase-item"><span class="p-check">●</span>30–100 enrolled patients, 8-week program, real PHQ-9 and UCLA-3 outcomes</div>
+        <div class="phase-item"><span class="p-check">●</span>Replace all simulated testimonials and fake live stats on website with real data</div>
+      </div>
+      <div class="phase-card phase-2">
+        <div class="phase-label">Phase 2</div>
+        <div class="phase-name">Scale It</div>
+        <div class="phase-timeline">Months 6–12 · 2nd customer · Raise seed round</div>
+        <div class="phase-item"><span class="p-check">●</span>Android app + WhatsApp-based MVP for lower-bandwidth Kenya users (critical for equity)</div>
+        <div class="phase-item"><span class="p-check">●</span>FiTi Clinical full portal — EHR-linked, alert system, clinical e-prescription workflow</div>
+        <div class="phase-item"><span class="p-check">●</span>FHIR R4 API development for Epic and Cerner integration</div>
+        <div class="phase-item"><span class="p-check">●</span>Cohort matching algorithm v2 — ML-based, improving on manual v1</div>
+        <div class="phase-item"><span class="p-check">●</span>White-label patient app for first paying health system customer</div>
+        <div class="phase-item"><span class="p-check">●</span>SOC2 Type II certification process begins (~$75K, 9 months)</div>
+        <div class="phase-item"><span class="p-check">●</span>Seed pitch deck anchored by Kenya pilot outcome data + 2nd customer LOI</div>
+      </div>
+      <div class="phase-card phase-3">
+        <div class="phase-label">Phase 3</div>
+        <div class="phase-name">Defend It</div>
+        <div class="phase-timeline">Months 12–24 · US/UK entry · Publication</div>
+        <div class="phase-item"><span class="p-check">●</span>Passive behavioral sensing via HealthKit (not raw OS access) — isolation risk model v3</div>
+        <div class="phase-item"><span class="p-check">●</span>FiTi Command full payer analytics — ROI reporting, HEDIS tracking, claims integration</div>
+        <div class="phase-item"><span class="p-check">●</span>Claims data integration with first US payer or employer partner</div>
+        <div class="phase-item"><span class="p-check">●</span>FDA SaMD regulatory review + legal opinion on any diagnostic claims language</div>
+        <div class="phase-item"><span class="p-check">●</span>Peer-reviewed publication of Kenya pilot outcomes (this is the US market key)</div>
+        <div class="phase-item"><span class="p-check">●</span>First US health system contract signed (not pilot — contract)</div>
+        <div class="phase-item"><span class="p-check">●</span>Proprietary matching algorithm becomes defensible moat vs. competitors</div>
+      </div>
+    </div>
+
+    <div class="truth">
+      <div class="truth-title">⚡ The Single Most Important Sentence</div>
+      <div class="truth-body">The FiTi website is the least valuable thing you can work on right now. The most valuable thing you can do in the next 90 days is get one real organization in Nairobi to sign a pilot agreement, enroll 30 real people, and collect 8 weeks of real PHQ-9 data. That single outcome is worth more than 12 months of design work, pitch deck revisions, and website polish combined. Build the minimum product to run that pilot — nothing more — and start there. The website becomes credible the moment you have real outcomes to put on it.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<div class="doc-footer">
+  <div class="footer-logo">Fi<em>Ti</em> Health</div>
+  <div class="footer-meta">Design Blueprint v1.0 · Compiled Jun 2025 · Honest analysis for internal use</div>
+</div>
+
+</body>
+</html>
