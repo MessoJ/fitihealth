@@ -1,655 +1,1333 @@
 import { useState, useEffect, useRef } from 'react'
+import './index.css'
 
-/* ─────────────────────────────────────────────────────────────
-   HOOKS & UTILITIES
-   ───────────────────────────────────────────────────────────── */
-function useInView(threshold = 0.12) {
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOOKS
+   ═══════════════════════════════════════════════════════════════════════════ */
+function useInView(opts = { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }) {
   const ref = useRef(null)
+  const [v, setV] = useState(false)
   useEffect(() => {
-    const el = ref.current; if (!el) return
+    const el = ref.current
+    if (!el) return
     const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { el.classList.add('in'); obs.unobserve(el) }
-    }, { threshold })
+      if (e.isIntersecting) { setV(true); obs.disconnect() }
+    }, opts)
     obs.observe(el)
     return () => obs.disconnect()
-  }, [threshold])
-  return ref
+  }, [])
+  return [ref, v]
 }
 
-function useCount(target, ms = 1600) {
-  const [n, setN] = useState(0)
-  const ref = useRef(null)
-  const ran = useRef(false)
-  useEffect(() => {
-    const el = ref.current; if (!el) return
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !ran.current) {
-        ran.current = true
-        const t0 = performance.now()
-        const tick = (t) => {
-          const p = Math.min((t - t0) / ms, 1)
-          setN(Math.floor((1 - Math.pow(1 - p, 4)) * target))
-          if (p < 1) requestAnimationFrame(tick)
-        }
-        requestAnimationFrame(tick)
-        obs.unobserve(el)
-      }
-    }, { threshold: 0.2 })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [target, ms])
-  return [n, ref]
-}
-
-/* ── Shared UI Icons & Glyphs ── */
-const Wordmark = ({ size = 'md' }) => {
-  const s = size === 'lg' ? '1.85rem' : size === 'sm' ? '1.25rem' : '1.55rem'
-  return (
-    <span className="wordmark" style={{ fontSize: s }}>
-      <span className="fi">Fi</span><span className="ti">Ti</span>
-    </span>
-  )
-}
-
-const Arrow = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M2 7H12M12 7L7.5 2.5M12 7L7.5 11.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-)
-
-const ChevronDown = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="faq-arrow">
-    <path d="M3 5L7 9L11 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-)
-
-/* ═════════════════════════════════════════════════════════════
-   NAV
-   ═════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   NAV — CLEAN, UNIQUE IDENTITY LOCKUP
+   ═══════════════════════════════════════════════════════════════════════════ */
 function Nav() {
-  const [up, setUp] = useState(false)
-  const [pct, setPct] = useState(0)
+  const [solid, setSolid] = useState(false)
   const [open, setOpen] = useState(false)
-
   useEffect(() => {
-    const h = () => {
-      setUp(window.scrollY > 40)
-      const t = document.documentElement.scrollHeight - window.innerHeight
-      setPct(t > 0 ? (window.scrollY / t) * 100 : 0)
-    }
+    const h = () => setSolid(window.scrollY > 8)
     window.addEventListener('scroll', h, { passive: true })
     return () => window.removeEventListener('scroll', h)
   }, [])
-
-  useEffect(() => {
-    const k = (e) => { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('keydown', k)
-    return () => document.removeEventListener('keydown', k)
-  }, [])
-
-  useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [open])
-
-  const close = () => setOpen(false)
-
+  const LINKS = [
+    ['#evidence', 'The Gap & Evidence'],
+    ['#platform', 'How It Works'],
+    ['#security', 'Clinical & Privacy'],
+    ['#interface', 'Two Surfaces'],
+    ['#modeler', 'Pilot Modeler'],
+    ['#audiences', 'For Partners'],
+  ]
   return (
-    <>
-      <div className="scroll-bar" style={{ width: `${pct}%` }} />
-      <nav className={`nav${up ? ' up' : ''}`}>
-        <div className="nav-row">
-          <a href="#top" onClick={close}><Wordmark /></a>
-          <div className="nav-links">
-            <a href="#crisis">The Problem</a>
-            <a href="#platform">Platform</a>
-            <a href="#flow">Referral Flow</a>
-            <a href="#audiences">Who It's For</a>
-            <a href="#evidence">Evidence</a>
+    <nav className={`nav${solid ? ' nav--solid' : ''}`}>
+      <div className="nav-inner wrap">
+        <a href="#" className="nav-brand-lockup" aria-label="FiTi home">
+          <div className="nav-wordmark">
+            <span className="logo-fi">Fi</span>
+            <span className="logo-ti">Ti</span>
+            <span className="logo-dot" />
           </div>
-          <div className="nav-actions">
-            <a href="#contact" className="nav-btn">Talk to us</a>
-          </div>
-          <button
-            className={`nav-ham${open ? ' open' : ''}`}
-            onClick={() => setOpen(!open)}
-            aria-label={open ? 'Close menu' : 'Open menu'}
-            aria-expanded={open}
-          >
-            <span /><span /><span />
-          </button>
+          <span className="nav-tagline-micro">CLINICAL SOCIAL HEALTH</span>
+        </a>
+        <div className="nav-links">
+          {LINKS.map(([h, l]) => <a href={h} key={h}>{l}</a>)}
         </div>
-      </nav>
-      <div className={`mobile-menu${open ? ' open' : ''}`}>
-        <div className="mobile-menu-inner">
-          <a href="#crisis" onClick={close}>The Problem</a>
-          <a href="#platform" onClick={close}>Platform</a>
-          <a href="#flow" onClick={close}>Referral Flow</a>
-          <a href="#audiences" onClick={close}>Who It's For</a>
-          <a href="#evidence" onClick={close}>Evidence</a>
-          <div className="mobile-menu-cta">
-            <a href="#contact" onClick={close} className="btn btn-fill">Talk to us <Arrow /></a>
-          </div>
-        </div>
+        <a href="#contact" className="nav-cta" id="nav-pilot-cta">Request pilot access</a>
+        <button className="nav-burger" onClick={() => setOpen(o => !o)} aria-label="Menu">
+          <span /><span /><span />
+        </button>
       </div>
-    </>
+      {open && (
+        <div className="nav-mobile">
+          {LINKS.map(([h, l]) => <a href={h} key={h} onClick={() => setOpen(false)}>{l}</a>)}
+          <a href="#contact" className="nav-mobile-cta" onClick={() => setOpen(false)}>Request pilot access →</a>
+        </div>
+      )}
+    </nav>
   )
 }
 
-/* ═════════════════════════════════════════════════════════════
-   HERO — Architectural Editorial Layout
-   ═════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   HERO — CLEAR CLINICAL SOCIAL HEALTH POSITIONING + MULTI-PHOTO COLLAGE
+   ═══════════════════════════════════════════════════════════════════════════ */
 function Hero() {
-  const r = useInView(0.05)
-  const [n1, r1] = useCount(871000, 2000)
-  const [n2, r2] = useCount(6700, 1400)
-  const [n3, r3] = useCount(42, 1200)
-
-  return (
-    <section id="top" className="hero-sec">
-      <div className="hero">
-        <div className="hero-img-side">
-          <img
-            src="./hero-photo.jpg"
-            alt="Two older adults in genuine conversation"
-            loading="eager"
-            fetchPriority="high"
-          />
-          <div className="hero-img-overlay" />
-        </div>
-
-        <div className="hero-wrap">
-          <div className="hero-left" ref={r}>
-            <h1 className="fade-up in">
-              Before the ER visit,<br />
-              there's a <em>gap.</em>
-            </h1>
-
-            <p className="hero-sub fade-up in d2">
-              People don't suddenly become ill from loneliness. It compounds —
-              quietly, expensively — over months. FiTi works with health systems
-              and employers to close that gap before it becomes a claim.
-            </p>
-
-            <div className="hero-ctas fade-up in d3">
-              <a href="#contact" className="btn btn-fill">Talk to us <Arrow /></a>
-              <a href="#platform" className="btn btn-line">See the platform</a>
-            </div>
-
-            <div className="hero-trust-row fade-up in d3">
-              <span className="hero-trust-text">Advised by clinical and payer leaders in value-based care</span>
-              <a href="#evidence" className="hero-trust-link">View evidence & citations →</a>
-            </div>
-
-            <div className="hero-numbers fade-up in d4">
-              <div className="stat-card" ref={r1}>
-                <div className="stat-n">{n1.toLocaleString()}</div>
-                <div className="stat-l">Deaths attributed to loneliness annually</div>
-                <div className="stat-src">Holt-Lunstad et al.</div>
-              </div>
-              <div className="stat-card" ref={r2}>
-                <div className="stat-n">${n2.toLocaleString()}</div>
-                <div className="stat-l">Excess annual cost per isolated patient</div>
-                <div className="stat-src">NIH meta-analysis</div>
-              </div>
-              <div className="stat-card" ref={r3}>
-                <div className="stat-n">{n3}%</div>
-                <div className="stat-l">Higher ER utilization when chronically isolated</div>
-                <div className="stat-src">Am. J. Public Health (relative risk, adjusted for age & comorbidities)</div>
-              </div>
-            </div>
-          </div>
-          <div />
-        </div>
-      </div>
-      <div className="hero-divider" />
-    </section>
-  )
-}
-
-/* ═════════════════════════════════════════════════════════════
-   CRISIS — Editorial Monograph & Precision Chart
-   ═════════════════════════════════════════════════════════════ */
-function Crisis() {
-  const rq = useInView()
-  const rb = useInView()
-
-  return (
-    <section className="crisis sec" id="crisis">
-      <div className="wrap">
-        <p ref={rq} className="crisis-quote fade-up">
-          "Health systems screen for loneliness every day. The score comes back.
-          Then — in most systems — <strong>nothing happens.</strong>"
-        </p>
-
-        <div className="crisis-body">
-          <div ref={rb} className="crisis-prose fade-up">
-            <p>
-              The US Preventive Services Task Force now recommends routine depression
-              and isolation screening. Primary care clinics comply. The PHQ-9 gets
-              administered. A score comes back.
-            </p>
-            <p>
-              And then there's no referral pathway to an actual community. The clinician
-              documents it and moves on. The patient goes home alone. The WHO declared
-              loneliness a global health threat in 2025, noting that{' '}
-              <span className="inline-stat">one in six adults</span>
-              <span className="inline-src">WHO, 2025</span>{' '}
-              reports meaningful social isolation — with health risks equivalent to
-              smoking 15 cigarettes daily.
-            </p>
-            <p>
-              The cost compounds: isolated patients show{' '}
-              <span className="inline-stat">32% elevated stroke risk</span>
-              <span className="inline-src">AHA, 2024</span>{' '}
-              and up to <span className="inline-stat">50% higher dementia incidence</span>
-              <span className="inline-src">The Lancet</span>{' '}
-              (relative risk, adjusted for age and comorbidities). These aren't soft
-              metrics — they're the claims your actuaries are already seeing.
-            </p>
-            <p>FiTi is what happens next.</p>
-          </div>
-
-          <div className="fade-up d1">
-            <div className="crisis-chart-card">
-              <div className="crisis-chart-header">
-                <div>
-                  <div className="crisis-chart-eyebrow">CLINICAL PATHWAY MODEL</div>
-                  <div className="crisis-chart-title">Isolation Severity → ED Utilization Trajectory</div>
-                </div>
-                <span className="crisis-badge">ACTUARIAL BRIEFING</span>
-              </div>
-
-              <div className="crisis-chart-wrap">
-                <svg viewBox="0 0 420 190" fill="none" className="crisis-svg">
-                  {/* Grid Lines */}
-                  <line x1="45" y1="20" x2="45" y2="155" stroke="#DDD8CE" strokeWidth="1" />
-                  <line x1="45" y1="155" x2="395" y2="155" stroke="#DDD8CE" strokeWidth="1" />
-                  <line x1="45" y1="90" x2="395" y2="90" stroke="#DDD8CE" strokeWidth=".7" strokeDasharray="4,4" />
-                  <line x1="45" y1="45" x2="395" y2="45" stroke="#E6E1D7" strokeWidth=".5" />
-                  
-                  {/* Axis Labels */}
-                  <text x="38" y="24" fontSize="8" fill="#6B6258" fontFamily="IBM Plex Mono, monospace" textAnchor="end">High</text>
-                  <text x="38" y="93" fontSize="8" fill="#8A8078" fontFamily="IBM Plex Mono, monospace" textAnchor="end">Med</text>
-                  <text x="38" y="158" fontSize="8" fill="#6B6258" fontFamily="IBM Plex Mono, monospace" textAnchor="end">Low</text>
-                  
-                  <text x="55" y="172" fontSize="7.5" fill="#6B6258" fontFamily="IBM Plex Mono, monospace">Month 0</text>
-                  <text x="220" y="172" fontSize="7.5" fill="#6B6258" fontFamily="IBM Plex Mono, monospace" textAnchor="middle">Month 6</text>
-                  <text x="385" y="172" fontSize="7.5" fill="#6B6258" fontFamily="IBM Plex Mono, monospace" textAnchor="end">Month 12</text>
-
-                  {/* Loneliness severity (Coral) */}
-                  <path
-                    d="M55,135 C110,133 150,118 190,95 C230,72 275,52 320,38 C355,27 375,25 385,25"
-                    stroke="#D95F3B" strokeWidth="2.4" fill="none"
-                  />
-                  <path
-                    d="M55,135 C110,133 150,118 190,95 C230,72 275,52 320,38 C355,27 375,25 385,25 L385,155 L55,155 Z"
-                    fill="url(#coralGrad)"
-                  />
-                  
-                  {/* ER Utilization (Teal Dashed) */}
-                  <path
-                    d="M55,145 C100,143 145,138 185,122 C225,106 270,78 315,55 C355,36 375,32 385,34"
-                    stroke="#0D9B88" strokeWidth="2" strokeDasharray="5,4" fill="none"
-                  />
-
-                  {/* Inflection Annotation */}
-                  <circle cx="215" cy="80" r="4" fill="#D95F3B" />
-                  <circle cx="215" cy="80" r="8" stroke="#D95F3B" strokeWidth="1" strokeOpacity="0.4" />
-                  <line x1="215" y1="75" x2="215" y2="35" stroke="#D95F3B" strokeWidth="1" strokeDasharray="2,2" />
-                  <rect x="155" y="15" width="120" height="18" rx="3" fill="#1E1B16" />
-                  <text x="215" y="27" fontSize="7.2" fill="#F4F0E8" fontFamily="IBM Plex Mono, monospace" textAnchor="middle">
-                    Escalation Inflection Point
-                  </text>
-
-                  <defs>
-                    <linearGradient id="coralGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#D95F3B" stopOpacity="0.16" />
-                      <stop offset="100%" stopColor="#D95F3B" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-
-              <div className="crisis-chart-legend">
-                <div className="legend-item">
-                  <span className="legend-dot" style={{ background: '#D95F3B' }} />
-                  <span>Loneliness Severity (UCLA-3 / PHQ-9 Composite)</span>
-                </div>
-                <div className="legend-item">
-                  <span className="legend-dot" style={{ background: '#0D9B88' }} />
-                  <span>Indexed Emergency Department (ED) Claims</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ═════════════════════════════════════════════════════════════
-   SOCIAL PROOF — Dual Authority Voices
-   ═════════════════════════════════════════════════════════════ */
-function Proof() {
-  const r = useInView()
-  return (
-    <section className="proof sec">
-      <div className="wrap">
-        <div ref={r} className="proof-inner fade-up">
-          <div className="proof-quotes-grid">
-            <div className="proof-quote-card">
-              <p className="proof-quote">
-                "The gap between screening and community is where we lose patients.
-                FiTi is the first platform I've seen that actually closes it — with
-                data I can present to my board."
-              </p>
-              <div className="proof-attr">
-                <img src="./advisor.jpg" alt="Dr. Sarah Mitchell" className="proof-avatar" />
-                <div>
-                  <div className="proof-name">Dr. Sarah Mitchell</div>
-                  <div className="proof-role">VP Population Health · Clinical Advisor</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="proof-quote-card">
-              <p className="proof-quote">
-                "In value-based care, upstream social isolation drives downstream ED claims.
-                Structuring community interventions with FHIR R4 and PHQ-9 tracking gives our actuarial team real ROI visibility."
-              </p>
-              <div className="proof-attr">
-                <div className="proof-avatar-initials">MV</div>
-                <div>
-                  <div className="proof-name">Marcus Vance</div>
-                  <div className="proof-role">VP Network Strategy & Value-Based Care</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="proof-partners">
-            <span className="proof-badge">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="proof-badge-svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-              PARTNER HEALTH SYSTEM
-            </span>
-            <span className="proof-badge">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="proof-badge-svg"><rect x="3" y="11" width="18" height="10" rx="2" ry="2"></rect><path d="M12 2v9M8 5h8"/></svg>
-              REGIONAL PAYER
-            </span>
-            <span className="proof-badge">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="proof-badge-svg"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              SELF-INSURED EMPLOYER
-            </span>
-            <span className="proof-badge">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="proof-badge-svg"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-              ACADEMIC MEDICAL CENTER
-            </span>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ═════════════════════════════════════════════════════════════
-   PLATFORM — Three Surfaces, Precision Engineered
-   ═════════════════════════════════════════════════════════════ */
-function Platform() {
-  const rh = useInView()
-  const rl = useInView()
-  const rp1 = useInView()
-  const rp2 = useInView()
-
-  return (
-    <section className="platform sec" id="platform">
-      <div className="wrap">
-        <div ref={rh} className="platform-header fade-up">
-          <span className="ch">PLATFORM ARCHITECTURE</span>
-          <h2>Three surfaces.<br />One evidence trail.</h2>
-          <p>
-            Each part of FiTi serves a different stakeholder — the member, the clinician,
-            and the executive. Together they form a closed, verifiable clinical loop.
-          </p>
-        </div>
-
-        {/* Lead card — Connect */}
-        <div ref={rl} className="p-lead fade-up">
-          <div className="p-lead-text">
-            <div className="p-card-meta">
-              <span className="p-tag tag-coral">MEMBER SURFACE</span>
-              <span className="p-proto">FHIR R4 SMART ON FHIR</span>
-            </div>
-            <div className="p-name">FiTi Connect</div>
-            <p className="p-desc">
-              Community matching, group activities, and regular wellbeing check-ins.
-              Designed to feel like a high-end social application. Tracked like a clinical instrument.
-            </p>
-            <div className="p-feats">
-              <div className="p-feat">Interest and location-based cohort matching</div>
-              <div className="p-feat">Facilitated peer spaces and scheduled activities</div>
-              <div className="p-feat">Bi-weekly wellbeing micro-surveys (PHQ-9 / UCLA-3)</div>
-              <div className="p-feat">Wearable telemetry for physical & sleep context</div>
-            </div>
-          </div>
-          <div className="p-lead-img">
-            <img
-              src="./mockup-connect.jpg"
-              alt="FiTi Connect mobile interface showing community circles and check-ins"
-              loading="lazy"
-            />
-          </div>
-        </div>
-
-        {/* Two smaller cards */}
-        <div className="p-pair">
-          <div ref={rp1} className="p-card fade-up d1">
-            <div className="p-card-img">
-              <img
-                src="./mockup-clinical.jpg"
-                alt="FiTi Clinical dashboard showing patient risk scores"
-                loading="lazy"
-              />
-            </div>
-            <div className="p-card-meta">
-              <span className="p-tag tag-teal">CLINICAL SURFACE</span>
-              <span className="p-proto">EHR WORKFLOW</span>
-            </div>
-            <div className="p-name">FiTi Clinical</div>
-            <p className="p-desc">
-              A care coordinator's single view of at-risk patients — direct referral,
-              score trajectories, and automated escalation alerts within EHR workflows.
-            </p>
-            <div className="p-feats">
-              <div className="p-feat">Patient risk stratification and timeline view</div>
-              <div className="p-feat">PHQ-9 score trajectory with rapid deterioration alerts</div>
-              <div className="p-feat">Direct Epic / Cerner / Athena integration</div>
-              <div className="p-feat">One-click referral from screening to active cohort</div>
-            </div>
-          </div>
-
-          <div ref={rp2} className="p-card fade-up d2">
-            <div className="p-card-img">
-              <img
-                src="./mockup-command.jpg"
-                alt="FiTi Command analytics showing cohort outcomes"
-                loading="lazy"
-              />
-            </div>
-            <div className="p-card-meta">
-              <span className="p-tag tag-violet">EXECUTIVE SURFACE</span>
-              <span className="p-proto">ACTUARIAL EXPORT</span>
-            </div>
-            <div className="p-name">FiTi Command</div>
-            <p className="p-desc">
-              Population-level outcome reports and the financial case for renewal —
-              built for the conversation that happens every quarter.
-            </p>
-            <div className="p-feats">
-              <div className="p-feat">Cohort-level longitudinal outcome reporting</div>
-              <div className="p-feat">Utilization and engagement analytics</div>
-              <div className="p-feat">Projected ED & readmission cost avoidance</div>
-              <div className="p-feat">Exportable dossiers for board & actuarial review</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ═════════════════════════════════════════════════════════════
-   REFERRAL FLOW — Architectural Pathway
-   ═════════════════════════════════════════════════════════════ */
-function Flow() {
-  const r = useInView()
-  const rSteps = useInView()
-  const steps = [
-    { n: '01', t: 'Screen', d: 'PHQ-9 or EHR social determinant flag', tag: 'EHR TRIGGER' },
-    { n: '02', t: 'Refer', d: 'One-click referral from standard EHR order', tag: 'SMART LAUNCH' },
-    { n: '03', t: 'Enrol', d: 'Patient matched to a curated local circle', tag: 'COHORT MATCH' },
-    { n: '04', t: 'Engage', d: 'Group activities + bi-weekly check-ins', tag: 'BI-WEEKLY UCLA-3' },
-    { n: '05', t: 'Report', d: 'Outcome telemetry flows back to dashboard', tag: 'ACTUARIAL FEED' },
+  const STATS = [
+    { n: '871,000', u: 'deaths/yr', l: 'attributed to social isolation globally', s: 'WHO Commission on Social Connection, 2025' },
+    { n: '$2–25B', u: 'excess spend', l: 'annual global healthcare cost burden', s: 'Systematic reviews, older adult populations' },
+    { n: '10×', u: 'more scalable', l: 'AI-matched group circles vs. 1:1 human visits', s: 'Software + community infrastructure model' },
   ]
 
   return (
-    <section className="flow sec" id="flow">
-      <div className="wrap">
-        <div ref={r} className="flow-header fade-up">
-          <span className="ch">CLINICAL REFERRAL PATHWAY</span>
-          <h2>The referral takes 30 seconds.</h2>
-          <p>Here is exactly what happens after a clinician flags an at-risk patient.</p>
-        </div>
-
-        <div ref={rSteps} className="flow-steps fade-up d1">
-          {steps.map((s, i) => (
-            <div className="flow-step" key={i}>
-              <div className="flow-node">
-                <span className="flow-num">{s.n}</span>
+    <section className="hero" id="home">
+      <div className="hero-grid" />
+      <div className="hero-glow" />
+      <div className="hero-wrap wrap">
+        <div className="hero-left">
+          <div className="hero-eyebrow">
+            <span className="h-pulse amber-pulse" />
+            THE POPULATION-LEVEL SOCIAL HEALTH PLATFORM
+          </div>
+          <h1 className="hero-h1">
+            Closing the gap between a <span className="h1-dim">loneliness screening</span> and real <span className="h1-serif">community support.</span>
+          </h1>
+          <p className="hero-body">
+            Every health system screens for social isolation using PHQ-9 and UCLA-3 questionnaires. But what happens after a patient checks the box? Usually nothing—or expensive 1:1 home visits that don't scale. FiTi algorithmically matches isolated members into local community circles and tracks longitudinal clinical outcomes, turning social connection into measurable health data.
+          </p>
+          <div className="hero-ctas">
+            <a href="#contact" className="h-cta-primary" id="hero-pilot-cta">Request 90-day pilot access</a>
+            <a href="#evidence" className="h-cta-ghost">Explore clinical evidence ↓</a>
+          </div>
+          <div className="hero-stats-grid">
+            {STATS.map((s, i) => (
+              <div className="hstat" key={i}>
+                <div className="hstat-n">{s.n} <span className="hstat-u">{s.u}</span></div>
+                <div className="hstat-l">{s.l}</div>
+                <div className="hstat-s">{s.s}</div>
               </div>
-              <div className="flow-content">
-                <span className="flow-tag">{s.tag}</span>
-                <div className="flow-title">{s.t}</div>
-                <div className="flow-desc">{s.d}</div>
+            ))}
+          </div>
+        </div>
+        <div className="hero-right">
+          <div className="hero-collage">
+            <div className="hero-photo-main-wrap">
+              <img
+                src="/hero_connect.png"
+                alt="Care coordinator reviewing patient engagement data and community circle attendance"
+                className="hero-photo-main"
+                loading="eager"
+              />
+              <div className="hero-photo-badge">
+                <span className="h-pulse amber-pulse" />
+                CARE COORDINATOR VIEW · COHORT TRACKING
+              </div>
+              <div className="hero-card-floating">
+                <div className="hcf-greeting">James R. · PHQ-9 Baseline: 14</div>
+                <div className="hcf-score-row">
+                  <span className="hcf-score">Wk 8</span>
+                  <span className="hcf-label">Joined Riverside Walking Circle · PHQ-9: 9 (Δ −5)</span>
+                </div>
               </div>
             </div>
-          ))}
+            <div className="hero-sub-card">
+              <img
+                src="/morning_checkin.png"
+                alt="Member checking in with a single bi-weekly question while having morning tea"
+                className="hsc-photo"
+                loading="eager"
+              />
+              <div className="hsc-content">
+                <span className="hsc-tag">MEMBER APP · BI-WEEKLY CHECK-IN</span>
+                <p className="hsc-quote">"How connected have you felt this week?" One question every two weeks + Apple Health step trends.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   )
 }
 
-/* ═════════════════════════════════════════════════════════════
-   AUDIENCES — Segmented Control & Scorecard
-   ═════════════════════════════════════════════════════════════ */
-const AUD = {
-  systems: {
-    label: 'Health Systems',
-    h3: 'From screening to programme in 30 seconds.',
-    intro: "Your care team screens for loneliness every day. FiTi is what they refer into — a clinically monitored community programme that generates outcome data you can present to your board.",
-    points: [
-      'Connect your EHR referral workflow directly to FiTi enrolment',
-      'Care coordinators see patient progress and score trajectories',
-      'IRB-appropriate outcome tracking from day one',
-      'No IT project required for the pilot phase',
-    ],
-    metrics: [
-      { n: '15–30%', l: 'Projected reduction in avoidable ER visits', note: 'Published social prescribing literature' },
-      { n: '20–48%', l: 'PHQ-9 improvement seen in comparable programmes', note: 'Meta-analysis, JAMA Network Open' },
-    ]
-  },
-  payers: {
-    label: 'Payers & Employers',
-    h3: 'Loneliness is costing you more than your EAP.',
-    intro: "Isolated members generate significantly more claims. FiTi addresses the upstream driver at $5–8 per member per month — a fraction of the $6,700+ annual excess cost per isolated member.",
-    points: [
-      'Per-member-per-month pricing that scales with population',
-      'Outcomes tracked against claims data, not self-reported surveys',
-      'Complements existing mental health benefits without replacing them',
-      'Shared savings structures available for risk-bearing contracts',
-    ],
-    metrics: [
-      { n: '3–5×', l: 'Social return on investment across comparable programmes', note: 'New Economics Foundation methodology' },
-      { n: '$400–$2,400', l: 'Projected annual savings per enrolled member', note: 'Based on ER reduction and readmission avoidance' },
-    ]
-  },
-  clinicians: {
-    label: 'Clinicians',
-    h3: 'You have a screening. We have the referral.',
-    intro: "The loneliness screening is the easy part. The hard part is where you send them. FiTi gives you a clinically monitored community to refer into, with outcomes that come back to your dashboard.",
-    points: [
-      'Refer directly from your EHR in under 30 seconds',
-      'Track patient engagement and PHQ-9 trends in your view',
-      'Automated alerts when a member shows deterioration',
-      'No new system to learn — works within existing workflows',
-    ],
-    metrics: [
-      { n: '85%+', l: 'Referral completion rate in early deployments', note: 'vs ~30% for standard community referrals' },
-      { n: '<4 hrs', l: 'Median response time for clinical escalation alerts', note: 'Pilot programme telemetry' },
-    ]
-  }
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   EVIDENCE & THE GAP — REALITY OF INACTION & COMMUNITY CIRCLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+function Evidence() {
+  const [rh, hv] = useInView()
+  const [rs, sv] = useInView()
+  const [rc, cv] = useInView()
+  const [rw, wv] = useInView()
 
-function Audiences() {
-  const [tab, setTab] = useState('systems')
-  const rh = useInView()
-  const d = AUD[tab]
+  const CRISIS = [
+    { n: '+42%', l: 'Higher emergency department visitation rate among isolated older adults', s: '67.8 vs 47.9 visits per 100 beneficiary-years (IRR = 1.15)' },
+    { n: '+32%', l: 'Elevated stroke and cardiovascular disease risk with chronic isolation', s: 'American Heart Association, 2022 — Cené et al.' },
+    { n: '+50%', l: 'Higher dementia incidence in socially isolated longitudinal cohorts', s: 'UK Biobank cohort analysis, HR ≈ 1.6, age-adjusted' },
+    { n: '$1,600+', l: 'Conservative excess annual healthcare expenditure per isolated member', s: 'Baseline benchmark from systematic health economics reviews' },
+  ]
 
   return (
-    <section className="audiences sec" id="audiences">
+    <section className="evidence sec" id="evidence">
       <div className="wrap">
-        <div ref={rh} className="audiences-header fade-up">
-          <span className="ch">STAKEHOLDER ALIGNMENT</span>
-          <h2>We speak three<br />different languages.</h2>
-          <p>Clinical, actuarial, and administrative. FiTi provides an institutional surface for each.</p>
+        <div ref={rh} className={`sec-hdr snap${hv ? ' in' : ''}`}>
+          <span className="sec-tag">01 · THE CLINICAL GAP</span>
+          <h2>Screening without intervention<br />is where chronic disease compounds.</h2>
+          <p>
+            Healthcare systems have successfully standardized loneliness screening across primary care and intake workflows. Yet when a patient screens positive, the typical clinical response is a static handout or filing the score in the EHR. Inaction remains our primary competitor—and the highest cost driver.
+          </p>
         </div>
 
-        <div className="aud-tabs-wrapper">
-          <div className="aud-tabs" role="tablist">
-            {Object.entries(AUD).map(([k, v]) => (
+        {/* Community Walk Photo Grid */}
+        <div ref={rs} className={`story-feature-grid snap${sv ? ' in' : ''}`}>
+          <div className="story-feature-img-wrap">
+            <img
+              src="/community_walk.png"
+              alt="Community walking circle members connecting on a sunny park trail"
+              className="story-feature-img"
+              loading="lazy"
+            />
+          </div>
+          <div className="story-feature-content">
+            <span className="sfc-tag">THE FITI INTERVENTION</span>
+            <h3 className="sfc-h3">AI-matched community circles that scale beyond 1:1 visits.</h3>
+            <p className="sfc-body">
+              While legacy models rely on expensive 1:1 human companionship visits that cost hundreds of dollars per session and face workforce constraints, FiTi algorithmically matches isolated members into sustained, small-group community circles based on geography, mobility, and shared interests.
+            </p>
+            <div className="sfc-stat-box">
+              <span className="sfc-stat-n">Group vs 1:1</span>
+              <span className="sfc-stat-l">Peer-to-peer social formation creates long-term resilience without requiring paid facilitators for every single interaction.</span>
+            </div>
+          </div>
+        </div>
+
+        <div ref={rc} className={`crisis-grid snap${cv ? ' in' : ''}`}>
+          {CRISIS.map((c, i) => (
+            <div className="crisis-stat" key={i}>
+              <div className="cs-n">{c.n}</div>
+              <div className="cs-l">{c.l}</div>
+              <div className="cs-s">{c.s}</div>
+            </div>
+          ))}
+        </div>
+
+        <div ref={rw} className={`waveform-block snap${wv ? ' in' : ''}`}>
+          <div className="waveform-eyebrow">LONGITUDINAL CLINICAL PATHWAY · PHQ-9 SCORE TRAJECTORY ACROSS 12-WEEK COHORT · MODELED ESTIMATES</div>
+          <img
+            src="/clinical_waveform.png"
+            alt="Modeled PHQ-9 clinical outcome trajectory comparing FiTi community intervention against waitlist control"
+            className="waveform-img"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PLATFORM — HOW IT WORKS (HONEST, REALISTIC SIGNALS)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function Platform() {
+  const [rh, hv] = useInView()
+  const [rg, gv] = useInView()
+
+  const CONSUMER = [
+    { label: 'Step Count Only', desc: 'Raw steps without context of outdoor mobility or isolation.' },
+    { label: 'Unvalidated Check-ins', desc: 'Generic emoji mood pickers that cannot map to EHR clinical codes.' },
+    { label: 'Solo Chatbots', desc: 'Replacing human interaction with AI conversational agents.' },
+    { label: 'Static Directory Links', desc: 'Giving patients a PDF or URL of local food banks and community centers.' },
+  ]
+
+  const CLINICAL = [
+    { label: 'AI Circle Matching', desc: 'Collaborative filtering based on zip code, schedule availability, mobility level, and shared affinities.' },
+    { label: 'Bi-Weekly PHQ-9 / UCLA-3', desc: 'Validated clinical assessment instruments delivered via 30-second low-friction check-ins.' },
+    { label: 'Apple Health / Google Fit Trends', desc: 'Privacy-preserving aggregate step and movement trends (`Δ days consecutive drop`) to flag acute withdrawal.' },
+    { label: 'Care Coordinator Alerts', desc: 'Real-time notifications sent to the care team when circle attendance or mobility drops significantly.' },
+  ]
+
+  return (
+    <section className="wedge sec" id="platform">
+      <div className="wrap">
+        <div ref={rh} className={`sec-hdr snap${hv ? ' in' : ''}`}>
+          <span className="sec-tag">02 · HOW IT WORKS</span>
+          <h2>Software infrastructure, not just services.<br />Built for clinical accountability.</h2>
+          <p>
+            Consumer wellness apps measure comfort metrics. Service-heavy human companionship models cannot scale to entire patient populations. FiTi combines intelligent circle formation with rigorous clinical measurement.
+          </p>
+        </div>
+        <div ref={rg} className={`wedge-grid snap${gv ? ' in' : ''}`}>
+          <div className="wedge-side dim-side">
+            <div className="ws-hdr">
+              <span className="ws-tag">THE STATUS QUO & CONSUMER APPS</span>
+              <span className="ws-sub">Unstructured or unscalable</span>
+            </div>
+            {CONSUMER.map((m, i) => (
+              <div className="wedge-row" key={i}>
+                <div className="wr-label">{m.label}</div>
+                <div className="wr-desc" style={{ marginTop: '0.25rem', color: '#8E8E93', fontSize: '0.85rem' }}>{m.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div className="wedge-sep">
+            <div className="wsep-line" />
+            <div className="wsep-lbl">THE SHIFT</div>
+            <div className="wsep-line" />
+          </div>
+          <div className="wedge-side lit-side">
+            <div className="ws-hdr">
+              <span className="ws-tag cobalt">THE FITI PLATFORM</span>
+              <span className="ws-sub">Structured, scalable, clinically validated</span>
+            </div>
+            {CLINICAL.map((m, i) => (
+              <div className="wedge-row active-row" key={i}>
+                <div className="wr-label" style={{ color: '#F5F5F7' }}>{m.label}</div>
+                <div className="wr-desc" style={{ marginTop: '0.25rem', color: '#C7C7CC', fontSize: '0.85rem' }}>{m.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SECURITY & PRIVACY — REALISTIC HEALTHKIT/FIT + FHIR INTEGRATION
+   ═══════════════════════════════════════════════════════════════════════════ */
+function Security() {
+  const [rh, hv] = useInView()
+  const [rj, jv] = useInView()
+
+  const LOG = [
+    { p: 'SYS', m: 'FITI_CONNECT_APP v1.4.0  status=ONLINE', t: 'ok' },
+    { p: 'DAT', m: 'apple_health_kit  sync=steps_daily_trend  status=OK', t: 'ok' },
+    { p: 'EMA', m: 'biweekly_checkin  instrument=PHQ9_UCLA3  patient_id=4471', t: 'ok' },
+    { p: 'ALT', m: 'mobility_trend_alert  score=consecutive_3day_drop  [NOTIFY_CARE_TEAM]', t: 'alt' },
+    { p: 'NET', m: 'HL7_FHIR_R4_Observation  bundle_generated=TRUE', t: 'ok' },
+    { p: 'SEC', m: 'PII_data_residency  region=us-east-1  encryption=AES256_GCM', t: 'ok' },
+    { p: 'SYS', m: 'status=ACCEPTING_90DAY_PILOT_COHORTS', t: 'ok' },
+  ]
+
+  const FHIR = [
+    { k: '"resourceType"', v: '"Observation"', t: 'str' },
+    { k: '"id"', v: '"fiti-phq9-20260718-4471"', t: 'str' },
+    { k: '"status"', v: '"final"', t: 'str' },
+    { k: '"code"', v: '{ "system": "http://loinc.org", "code": "44261-6", "display": "PHQ-9 total score" }', t: 'obj' },
+    { k: '"subject"', v: '"Patient/4471-pseudonymized"', t: 'str' },
+    { k: '"effectiveDateTime"', v: '"2026-07-18T08:00:00Z"', t: 'str' },
+    { k: '"valueInteger"', v: '9', t: 'num' },
+    { k: '"interpretation"', v: '[{ "code": "M", "display": "Moderate depression improvement (Δ −5)" }]', t: 'obj' },
+    { k: '"note"', v: '"Member joined Riverside Walking Circle. Attendance rate 85% across 8 weeks."', t: 'str' },
+  ]
+
+  return (
+    <section className="moat sec" id="security">
+      <div className="wrap">
+        <div ref={rh} className={`sec-hdr snap${hv ? ' in' : ''}`}>
+          <span className="sec-tag">03 · CLINICAL INTEGRATION & PRIVACY</span>
+          <h2>HIPAA-ready architecture.<br />No invasive background tracking.</h2>
+          <p>
+            We never scrape call logs, raw GPS traces, or invasive device metrics. FiTi operates strictly on explicit bi-weekly check-ins and standard Apple Health / Google Fit step trends. For health systems, all outcomes export directly to standard HL7 FHIR R4 payloads.
+          </p>
+        </div>
+
+        {/* Runtime Log */}
+        <div className="runtime-log">
+          <div className="rlog-hdr">
+            <span className="rlog-title">FITI CLINICAL ENGINE · SYSTEM LOG</span>
+            <span className="rlog-live"><span className="h-pulse cobalt-pulse" />READY</span>
+          </div>
+          <div className="rlog-body">
+            {LOG.map((l, i) => (
+              <div className={`rlog-line rlog-${l.t}`} key={i}>
+                <span className="rlog-prefix">[{l.p}]</span>
+                <span className="rlog-msg">{l.m}</span>
+              </div>
+            ))}
+          </div>
+          <div className="rlog-ftr">
+            <span>PLATFORM: FLUTTER + NESTJS</span>
+            <span>STANDARD: HL7 FHIR R4</span>
+            <span>PILOT SETUP: 0 DAYS EHR BLOCKER</span>
+            <span>COMPLIANCE: SOC2 TYPE II ROADMAP INITIATED</span>
+            <span>EHR TARGET: EPIC SHOWROOM / CONNECTION HUB READY</span>
+          </div>
+        </div>
+
+        {/* FHIR JSON */}
+        <div ref={rj} className={`fhir-wrap snap${jv ? ' in' : ''}`} style={{ marginTop: '3rem' }}>
+          <div className="fhir-eyebrow">HL7 FHIR R4 · OBSERVATION RESOURCE EXPORT</div>
+          <div className="fhir-block">
+            <div className="fhir-top">
+              <span className="fhir-resource-id">Observation/fiti-phq9-20260718-4471</span>
+              <span className="fhir-badge">CLINICAL EXPORT FORMAT</span>
+            </div>
+            <div className="fhir-code">
+              <div className="fhir-brace">{'{'}</div>
+              {FHIR.map((l, i) => (
+                <div className="fhir-line" key={i}>
+                  <span className="fhir-key">{l.k}</span>
+                  <span className="fhir-colon">: </span>
+                  <span className={`fhir-val ft-${l.t}`}>{l.v}</span>
+                  {i < FHIR.length - 1 && <span className="fhir-comma">,</span>}
+                </div>
+              ))}
+              <div className="fhir-brace">{'}'}</div>
+            </div>
+          </div>
+          <div className="fhir-note">
+            During Phase 1 pilots, care coordinators utilize a standalone secure web dashboard—requiring zero IT queue or EHR integration delays to launch. When ready for production rollout, FHIR R4 bundles connect directly to Epic Connection Hub, Cerner, or Athena APIs.
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UI ICON SYSTEM (PURE INLINE SVG FOR SCALE & ZERO DEPENDENCY)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function IconPhone({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+      <line x1="12" y1="18" x2="12.01" y2="18" />
+    </svg>
+  )
+}
+
+function IconDashboard({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="9" rx="1" />
+      <rect x="14" y="3" width="7" height="5" rx="1" />
+      <rect x="14" y="12" width="7" height="9" rx="1" />
+      <rect x="3" y="16" width="7" height="5" rx="1" />
+    </svg>
+  )
+}
+
+function IconAI({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+function IconChat({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  )
+}
+
+function IconActivity({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+  )
+}
+
+function IconCheck({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+  )
+}
+
+function IconAlert({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  )
+}
+
+function IconPhoneCall({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  )
+}
+
+function IconCode({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
+    </svg>
+  )
+}
+
+function IconUsers({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  )
+}
+
+function IconShield({ size = 18, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INTERFACE — TWO SURFACES (MEMBER APP + CARE COORDINATOR DASHBOARD)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function Interface() {
+  const [tab, setTab] = useState('member')
+  const [rh, hv] = useInView()
+
+  return (
+    <section className="interface-sec sec" id="interface">
+      <div className="wrap">
+        <div ref={rh} className={`sec-hdr snap${hv ? ' in' : ''}`}>
+          <span className="sec-tag">04 · TWO SURFACES & DUAL AI ENGINES</span>
+          <h2>Dignity for the member.<br />Actionable data for the clinician.</h2>
+          <p>
+            The member experience feels supportive and engaging—powered by <strong>FiTi Match-AI™</strong> for peer chemistry. The care coordinator dashboard provides instant visibility into cohort engagement, risk flags, and PHQ-9 improvements—powered by <strong>FiTi Triage-AI™</strong>.
+          </p>
+        </div>
+
+        {/* Care Connection Photo Banner */}
+        <div className="story-feature-grid" style={{ marginBottom: '3.5rem' }}>
+          <div className="story-feature-img-wrap">
+            <img
+              src="/care_connection.png"
+              alt="Care coordinator having a warm, empathetic conversation with a community member"
+              className="story-feature-img"
+              loading="lazy"
+            />
+          </div>
+          <div className="story-feature-content">
+            <span className="sfc-tag" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <IconAI size={14} color="var(--amber)" /> HUMAN-IN-THE-LOOP + AI EARLY WARNING
+            </span>
+            <h3 className="sfc-h3">Empowering care coordinators right when it matters.</h3>
+            <p className="sfc-body">
+              When FiTi Triage-AI™ detects that a member has missed circle meetings or shows a sustained drop in Apple Health mobility trends, it alerts the care coordinator with a synthesized call script. Instead of generic check-ins, the care team reaches out with precision and warmth, bridging the gap before acute isolation leads to an ED visit.
+            </p>
+          </div>
+        </div>
+
+        <div className="if-tabs">
+          <button
+            id="tab-member"
+            className={`if-tab${tab === 'member' ? ' if-tab--active-member' : ''}`}
+            onClick={() => setTab('member')}
+            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <IconPhone size={18} color={tab === 'member' ? 'var(--amber)' : 'var(--text-dark)'} />
+            <span>FiTi Connect — Member Mobile App</span>
+          </button>
+          <button
+            id="tab-clinician"
+            className={`if-tab${tab === 'clinician' ? ' if-tab--active-system' : ''}`}
+            onClick={() => setTab('clinician')}
+            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+          >
+            <IconDashboard size={18} color={tab === 'clinician' ? '#82B1FF' : 'var(--text-dark)'} />
+            <span>FiTi Clinical — Care Coordinator Web Dashboard</span>
+          </button>
+        </div>
+        <div className="if-panel">
+          {tab === 'member' ? <MemberPanel /> : <ClinicianPanel />}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function MemberPanel() {
+  const [phq, setPhq] = useState(2)
+  const [saved, setSaved] = useState(false)
+  const [rsvp, setRsvp] = useState(false)
+  const [activeTab, setActiveTab] = useState('checkin')
+  const [persona, setPersona] = useState('James R.')
+  const [chatReply, setChatReply] = useState(false)
+  const [aiInviteSent, setAiInviteSent] = useState(false)
+
+  const PERSONAS = {
+    'James R.': {
+      title: 'Active Senior · Week 8 in Circle',
+      circle: 'Riverside Walking Circle',
+      peers: 6,
+      attendance: '85%',
+      phqTrend: 'Baseline 14 → Now 9 (Δ −5 Moderate improvement)',
+      steps: '5,420 avg steps/day (Stable)',
+      aiMatch: '94% Match Score · Low friction peer chemistry',
+      aiMatchFactors: 'Pace: 2.5 MPH · Morning Availability · Dog Owner · 1.2 mi radius',
+      nextMeetup: 'Tomorrow · 10:00 am @ Park Entrance',
+      messages: [
+        { sender: 'Maria S. (Leader)', text: 'Looking forward to our morning walk by the river! Bringing herbal tea for everyone.', time: '9:15 am' },
+        { sender: 'David K.', text: 'I will be at the north gate by 9:50 am.', time: '9:22 am' },
+        { sender: 'Patricia M.', text: 'See you all tomorrow! My knees are feeling great this week.', time: '9:30 am' }
+      ]
+    },
+    'Elena V.': {
+      title: 'Post-Discharge · Week 4 in Circle',
+      circle: 'Heart & Wellness Recovery Circle',
+      peers: 8,
+      attendance: '92%',
+      phqTrend: 'Baseline 16 → Now 11 (Δ −5 Notable recovery)',
+      steps: '3,100 avg steps/day (↑ 20% increase)',
+      aiMatch: '96% Match Score · Post-discharge cardiac recovery peer group',
+      aiMatchFactors: 'Pace: Gentle · Tuesday Check-ins · Shared discharge window',
+      nextMeetup: 'Thursday · 2:00 pm @ Community Center Garden',
+      messages: [
+        { sender: 'Dr. Alistair (Facilitator)', text: 'Reminder: Gentle pacing is key. How is everyone feeling today?', time: '10:05 am' },
+        { sender: 'Elena V. (You)', text: 'Feeling much steadier after our Tuesday check-in.', time: '10:12 am' }
+      ]
+    },
+    'Marcus T.': {
+      title: 'Remote Workforce · Week 6 in Circle',
+      circle: 'Tech & Transit Morning Circle',
+      peers: 10,
+      attendance: '78%',
+      phqTrend: 'Baseline 12 → Now 7 (Δ −5 Mild stress reduction)',
+      steps: '6,800 avg steps/day (Active)',
+      aiMatch: '91% Match Score · Downtown tech workers peer cluster',
+      aiMatchFactors: 'Pace: Brisk · Noon Break Walks · Transit hub proximity',
+      nextMeetup: 'Saturday · 9:00 am @ Downtown Coffee & Walk',
+      messages: [
+        { sender: 'Sam R.', text: 'Anyone up for a quick 20-min walking meeting break at noon?', time: '8:45 am' },
+        { sender: 'Marcus T. (You)', text: 'Count me in, grabbing my sneakers now.', time: '8:47 am' }
+      ]
+    }
+  }
+
+  const pData = PERSONAS[persona]
+
+  return (
+    <div className="member-panel">
+      <div className="mp-phone" style={{ position: 'relative' }}>
+        <div className="mpp-statusbar">
+          <span>9:41</span>
+          <span style={{ fontSize: '0.65rem', background: 'rgba(224,138,62,0.2)', color: 'var(--amber)', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <IconAI size={12} color="var(--amber)" /> {persona.split(' ')[0]}'s App
+          </span>
+          <span>●●● ▇▇</span>
+        </div>
+        <div className="mpp-body" style={{ minHeight: '480px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          
+          {activeTab === 'checkin' && (
+            <div>
+              <div className="mpp-greeting">Good morning, {persona.split(' ')[0]}.</div>
+              <div className="mpp-date">{pData.title}</div>
+              
+              <div className="mpp-score-block">
+                <span className="mpp-score-n" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <IconActivity size={28} color="var(--amber)" /> {pData.attendance}
+                </span>
+                <span className="mpp-score-label">circle attendance rate</span>
+              </div>
+
+              {/* AI Group Chemistry Card */}
+              <div style={{ background: '#1C1610', border: '1px solid rgba(224, 138, 62, 0.4)', borderRadius: '12px', padding: '0.9rem', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                  <span style={{ fontSize: '0.68rem', fontFamily: 'var(--mono)', color: 'var(--amber)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <IconAI size={13} color="var(--amber)" /> FITI MATCH-AI™ CHEMISTRY RADAR
+                  </span>
+                  <span style={{ background: 'var(--amber)', color: '#0A0806', fontSize: '0.65rem', fontWeight: 800, padding: '2px 6px', borderRadius: '4px' }}>
+                    {pData.aiMatch.split(' ')[0]}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#F5F5F7', fontWeight: 600, marginBottom: '0.25rem' }}>
+                  {pData.aiMatch}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#C7C7CC', lineHeight: 1.3 }}>
+                  Matched on: {pData.aiMatchFactors}
+                </div>
+              </div>
+
+              <div className="mpp-ema-card">
+                <div className="mpp-q" style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
+                  <IconCheck size={16} color="var(--amber)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <span>Bi-Weekly Check-in: Over the last 2 weeks, how often have you felt lonely or left out?</span>
+                </div>
+                <div className="mpp-scale-labels" style={{ marginTop: '0.75rem', marginBottom: '0.75rem', display: 'flex', gap: '0.4rem' }}>
+                  <button onClick={() => { setPhq(0); setSaved(false) }} className={`mpp-btn ${phq === 0 ? 'active' : ''}`} style={{ flex: 1, padding: '0.45rem 0.4rem', borderRadius: '6px', background: phq === 0 ? '#E08A3E' : '#2C2C2E', border: 'none', color: '#fff', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}>Hardly ever</button>
+                  <button onClick={() => { setPhq(1); setSaved(false) }} className={`mpp-btn ${phq === 1 ? 'active' : ''}`} style={{ flex: 1, padding: '0.45rem 0.4rem', borderRadius: '6px', background: phq === 1 ? '#E08A3E' : '#2C2C2E', border: 'none', color: '#fff', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}>Some of time</button>
+                  <button onClick={() => { setPhq(2); setSaved(false) }} className={`mpp-btn ${phq === 2 ? 'active' : ''}`} style={{ flex: 1, padding: '0.45rem 0.4rem', borderRadius: '6px', background: phq === 2 ? '#E08A3E' : '#2C2C2E', border: 'none', color: '#fff', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}>Often</button>
+                </div>
+                {!saved ? (
+                  <button onClick={() => setSaved(true)} className="mpp-submit" style={{ width: '100%', marginTop: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <span>Save check-in</span> →
+                  </button>
+                ) : (
+                  <div style={{ background: 'rgba(52, 199, 89, 0.15)', border: '1px solid #34C759', borderRadius: '6px', padding: '0.5rem', textAlign: 'center', fontSize: '0.75rem', color: '#34C759', marginTop: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                    <IconCheck size={14} color="#34C759" /> Check-in saved securely. {pData.phqTrend}.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'circle' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem', borderBottom: '1px solid #26201A', paddingBottom: '0.5rem' }}>
+                <div>
+                  <div style={{ fontSize: '0.68rem', fontFamily: 'var(--mono)', color: 'var(--amber)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <IconUsers size={12} color="var(--amber)" /> MATCHED STREAM CHAT CIRCLE
+                  </div>
+                  <div style={{ fontWeight: 700, color: '#F5F5F7', fontSize: '0.95rem' }}>{pData.circle} ({pData.peers} peers)</div>
+                </div>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34C759', display: 'inline-block' }} />
+              </div>
+
+              {/* AI Icebreaker Card */}
+              <div style={{ background: 'rgba(224, 138, 62, 0.12)', border: '1px solid var(--amber)', borderRadius: '10px', padding: '0.75rem', marginBottom: '0.8rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.68rem', fontWeight: 700, color: 'var(--amber)', marginBottom: '0.3rem' }}>
+                  <IconAI size={13} color="var(--amber)" /> FITI PULSE AI™ ICEBREAKER SUGGESTION
+                </div>
+                <div style={{ fontSize: '0.76rem', color: '#F5F5F7', lineHeight: 1.3, marginBottom: '0.5rem' }}>
+                  "Apple Weather shows sunny skies Tuesday after your river walk! Would you like to invite the circle for tea at the park café?"
+                </div>
+                {!aiInviteSent ? (
+                  <button
+                    onClick={() => setAiInviteSent(true)}
+                    style={{ background: 'var(--amber)', border: 'none', color: '#0A0806', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <IconChat size={12} color="#0A0806" /> Dispatch Invitation to Circle
+                  </button>
+                ) : (
+                  <div style={{ fontSize: '0.72rem', color: '#34C759', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <IconCheck size={12} color="#34C759" /> AI-suggested invitation posted to group!
+                  </div>
+                )}
+              </div>
+
+              {/* Chat Simulation */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '180px', overflowY: 'auto', marginBottom: '0.8rem', paddingRight: '0.3rem' }}>
+                {pData.messages.map((m, idx) => (
+                  <div key={idx} style={{ background: m.sender.includes('You') ? 'rgba(224, 138, 62, 0.15)' : '#181410', border: '1px solid #2C2C2E', borderRadius: '10px', padding: '0.65rem', alignSelf: m.sender.includes('You') ? 'flex-end' : 'flex-start', maxWidth: '88%' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.6rem', marginBottom: '0.2rem' }}>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: m.sender.includes('You') ? 'var(--amber)' : '#82B1FF' }}>{m.sender}</span>
+                      <span style={{ fontSize: '0.65rem', color: '#636366', fontFamily: 'var(--mono)' }}>{m.time}</span>
+                    </div>
+                    <div style={{ fontSize: '0.82rem', color: '#E2E8F0', lineHeight: 1.4 }}>{m.text}</div>
+                  </div>
+                ))}
+                {aiInviteSent && (
+                  <div style={{ background: 'rgba(224, 138, 62, 0.25)', border: '1px solid var(--amber)', borderRadius: '10px', padding: '0.65rem', alignSelf: 'flex-end', maxWidth: '88%' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--amber)' }}>You (via FiTi Pulse AI)</div>
+                    <div style={{ fontSize: '0.82rem', color: '#fff' }}>Hey everyone! Since Tuesday is sunny, who wants to grab tea at the park café right after our walk? ☕☀️</div>
+                  </div>
+                )}
+                {chatReply && (
+                  <div style={{ background: 'rgba(224, 138, 62, 0.2)', border: '1px solid var(--amber)', borderRadius: '10px', padding: '0.65rem', alignSelf: 'flex-end', maxWidth: '88%' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--amber)' }}>You</div>
+                    <div style={{ fontSize: '0.82rem', color: '#fff' }}>Count me in! Looking forward to seeing everyone. 👟</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Reply Bar */}
+              <div style={{ background: '#181410', border: '1px solid #2C2C2E', borderRadius: '12px', padding: '0.6rem' }}>
+                <div style={{ fontSize: '0.68rem', color: '#8E8E93', marginBottom: '0.4rem' }}>Quick Circle Response:</div>
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <button
+                    onClick={() => setChatReply(true)}
+                    style={{ flex: 1, background: '#2C2C2E', border: 'none', color: '#F5F5F7', padding: '0.45rem', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                  >
+                    👋 See you there!
+                  </button>
+                  <button
+                    onClick={() => setChatReply(true)}
+                    style={{ flex: 1, background: 'var(--amber)', border: 'none', color: '#0A0806', padding: '0.45rem', borderRadius: '6px', fontSize: '0.72rem', cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                  >
+                    💬 Post Check-in
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'trends' && (
+            <div>
+              <div style={{ fontSize: '0.72rem', fontFamily: 'var(--mono)', color: 'var(--amber)', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <IconActivity size={14} color="var(--amber)" /> APPLE HEALTH / GOOGLE FIT SYNC
+              </div>
+              <div style={{ fontWeight: 700, color: '#F5F5F7', fontSize: '1.1rem', marginBottom: '1rem' }}>Longitudinal Activity & Mood</div>
+              
+              <div style={{ background: '#181410', border: '1px solid #2C2C2E', borderRadius: '12px', padding: '1rem', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#C7C7CC' }}>Daily Movement Trend</span>
+                  <span style={{ fontSize: '0.85rem', fontFamily: 'var(--mono)', color: '#34C759', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <IconActivity size={14} color="#34C759" /> {pData.steps}
+                  </span>
+                </div>
+                <div style={{ height: '6px', background: '#2C2C2E', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{ width: '82%', height: '100%', background: 'linear-gradient(90deg, #E08A3E, #34C759)' }} />
+                </div>
+              </div>
+
+              {/* AI Longitudinal Synthesis Card */}
+              <div style={{ background: '#1C1610', border: '1px solid rgba(224, 138, 62, 0.4)', borderRadius: '12px', padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.72rem', fontWeight: 700, color: 'var(--amber)', marginBottom: '0.4rem' }}>
+                  <IconAI size={14} color="var(--amber)" /> FITI MATCH-AI™ LONGITUDINAL SYNTHESIS
+                </div>
+                <div style={{ fontSize: '0.82rem', color: '#E2E8F0', lineHeight: 1.4 }}>
+                  AI trend engine confirms 8-week steady correlation between circle meetups (+2,400 steps on Tuesdays) and PHQ-9 improvement ({pData.phqTrend}).
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Interactive Phone Bottom Bar / Tabs with Icons */}
+          <div style={{ display: 'flex', borderTop: '1px solid #26201A', paddingTop: '0.75rem', marginTop: '1rem', gap: '0.4rem' }}>
+            <button
+              onClick={() => setActiveTab('checkin')}
+              style={{ flex: 1, padding: '0.5rem 0.2rem', borderRadius: '8px', background: activeTab === 'checkin' ? 'rgba(224, 138, 62, 0.2)' : 'transparent', border: activeTab === 'checkin' ? '1px solid var(--amber)' : '1px solid transparent', color: activeTab === 'checkin' ? 'var(--amber)' : '#8E8E93', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+            >
+              <IconPhone size={14} color={activeTab === 'checkin' ? 'var(--amber)' : '#8E8E93'} /> Check-in
+            </button>
+            <button
+              onClick={() => { setActiveTab('circle'); setChatReply(false); setAiInviteSent(false) }}
+              style={{ flex: 1, padding: '0.5rem 0.2rem', borderRadius: '8px', background: activeTab === 'circle' ? 'rgba(224, 138, 62, 0.2)' : 'transparent', border: activeTab === 'circle' ? '1px solid var(--amber)' : '1px solid transparent', color: activeTab === 'circle' ? 'var(--amber)' : '#8E8E93', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+            >
+              <IconChat size={14} color={activeTab === 'circle' ? 'var(--amber)' : '#8E8E93'} /> My Circle
+            </button>
+            <button
+              onClick={() => setActiveTab('trends')}
+              style={{ flex: 1, padding: '0.5rem 0.2rem', borderRadius: '8px', background: activeTab === 'trends' ? 'rgba(224, 138, 62, 0.2)' : 'transparent', border: activeTab === 'trends' ? '1px solid var(--amber)' : '1px solid transparent', color: activeTab === 'trends' ? 'var(--amber)' : '#8E8E93', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+            >
+              <IconActivity size={14} color={activeTab === 'trends' ? 'var(--amber)' : '#8E8E93'} /> Trends
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side Caption & Persona Switcher */}
+      <div className="mp-caption">
+        <div className="mpc-tag" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <IconPhone size={14} color="var(--amber)" /> MEMBER EXPERIENCE · FLUTTER MOBILE APP + AI MATCHING
+        </div>
+        <h3>Zero survey fatigue.<br />AI Chemistry first.</h3>
+        <p>
+          We deliberately avoid clinical jargon in the member app. <strong>FiTi Match-AI™</strong> quietly clusters seniors and workforce peers based on pace, schedule, and neighborhood chemistry, while <strong>FiTi Pulse AI™</strong> breaks the ice naturally when group activity dips. All clinical outcome mapping occurs securely on the backend.
+        </p>
+
+        {/* Persona Switcher with Icons */}
+        <div style={{ background: '#12100E', border: '1px solid #2C2C2E', borderRadius: '12px', padding: '1.25rem', marginTop: '0.5rem' }}>
+          <div style={{ fontSize: '0.75rem', fontFamily: 'var(--mono)', color: 'var(--amber)', fontWeight: 700, marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <IconUsers size={14} color="var(--amber)" /> TEST LIVE MEMBER COHORT PERSONAS & AI CHEMISTRY
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {Object.keys(PERSONAS).map((name) => (
               <button
-                key={k}
-                role="tab"
-                aria-selected={tab === k}
-                className={`aud-tab${tab === k ? ' on' : ''}`}
-                onClick={() => setTab(k)}
+                key={name}
+                onClick={() => { setPersona(name); setSaved(false); setChatReply(false); setAiInviteSent(false) }}
+                style={{
+                  padding: '0.5rem 0.9rem',
+                  borderRadius: '6px',
+                  background: persona === name ? 'var(--amber)' : '#1C1C1E',
+                  color: persona === name ? '#0A0806' : '#C7C7CC',
+                  border: 'none',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
               >
-                {v.label}
+                <IconPhone size={12} color={persona === name ? '#0A0806' : '#C7C7CC'} />
+                {name} ({PERSONAS[name].circle.split(' ')[0]})
               </button>
             ))}
           </div>
         </div>
 
-        <div className="aud-panel on" key={tab}>
-          <div className="aud-info">
-            <h3>{d.h3}</h3>
-            <p>{d.intro}</p>
-            <div className="aud-points">
-              {d.points.map((pt, i) => (
-                <div className="aud-point" key={i}>
-                  <span className="aud-dash">—</span>
-                  <span>{pt}</span>
+        <div className="mpc-specs">
+          {[
+            ['Targeted populations', 'Older adults, chronic care, post-discharge'],
+            ['AI Chemistry Engine', 'FiTi Match-AI™ (Multi-factor group clustering)'],
+            ['Active check-in schedule', 'Bi-weekly (PHQ-9 / UCLA-3 derived)'],
+            ['Movement indicator', 'Apple Health / Google Fit step trends'],
+            ['Group format', 'Small AI-matched cohorts (6–10 peers)'],
+            ['Platform support', 'iOS + low-end Android optimized'],
+          ].map(([k, v], i) => (
+            <div className="mpc-row" key={i}>
+              <span className="mpc-k">{k}</span>
+              <span className="mpc-v">{v}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ClinicianPanel() {
+  const [selectedPatient, setSelectedPatient] = useState('Robert T.')
+  const [filter, setFilter] = useState('ALL')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [actionStatus, setActionStatus] = useState('')
+  const [showFhirModal, setShowFhirModal] = useState(false)
+
+  const patients = [
+    { id: 'James R.', pseudonym: 'PT-4412-JR', status: 'ATTENDING', phq: 9, delta: 'Δ −5', alert: '8 weeks active · 85% attendance', flag: false, steps: '5,420 avg', isolation: 'Low (3/9)', edRisk: '12% (Low)', aiNote: 'Consistent attendance and high peer attachment. Zero clinical escalation required.', history: 'Baseline PHQ-9: 14. Joined Riverside Walking Circle Wk 2. Consistent attendance and high peer attachment.' },
+    { id: 'Robert T.', pseudonym: 'PT-4471-RT', status: 'AT RISK', phq: 15, delta: 'Δ +2', alert: '3 consecutive circle meetups missed', flag: true, steps: '1,840 avg (⚠️ 66% drop)', isolation: 'High (7/9)', edRisk: '🔴 82% (High Risk)', aiNote: 'AI Multi-Modal Triage Alert: 66% drop in Apple Health step velocity over 72h coincides with consecutive missed circle walks. Immediate warm call required.', history: 'Baseline PHQ-9: 13. Missed last 3 meetups. Apple Health telemetry flags consecutive 3-day step reduction below 2,000 threshold.' },
+    { id: 'Maria S.', pseudonym: 'PT-4390-MS', status: 'ATTENDING', phq: 6, delta: 'Δ −6', alert: 'High engagement · Circle leader', flag: false, steps: '6,100 avg', isolation: 'Low (3/9)', edRisk: '5% (Low)', aiNote: 'Strong circle facilitator chemistry. UCLA-3 isolation score improved by 4 points.', history: 'Baseline PHQ-9: 12. Excellent peer formation. UCLA-3 isolation score improved by 4 points.' },
+    { id: 'Patricia M.', pseudonym: 'PT-4488-PM', status: 'ATTENDING', phq: 8, delta: 'Δ −4', alert: 'Stable step trends · Wk 8', flag: false, steps: '4,800 avg', isolation: 'Moderate (5/9)', edRisk: '14% (Low)', aiNote: 'Stable step patterns and zero missed check-ins. Attends Tuesday morning tea group.', history: 'Baseline PHQ-9: 12. Attends Tuesday morning tea group. Stable step patterns and zero missed check-ins.' },
+    { id: 'David K.', pseudonym: 'PT-4502-DK', status: 'AT RISK', phq: 14, delta: 'Δ 0', alert: 'Apple Health trend: 3-day step drop', flag: true, steps: '2,100 avg (⚠️ 3-day drop)', isolation: 'High (6/9)', edRisk: '🟡 64% (Elevated)', aiNote: 'AI Telemetry Flag: Circle attendance dropped to 50%. Step reduction detected over weekend. Requires care coordinator warm check-in.', history: 'Baseline PHQ-9: 14. Circle attendance 50%. Step drop detected over weekend. Requires care coordinator warm check-in.' },
+    { id: 'Elena V.', pseudonym: 'PT-4519-EV', status: 'ATTENDING', phq: 11, delta: 'Δ −5', alert: 'Post-discharge Wk 4 · Active', flag: false, steps: '3,100 avg (↑ 20% gain)', isolation: 'Moderate (4/9)', edRisk: '22% (Recovering)', aiNote: 'Enrolled 3 days post-discharge. Mobility increasing steadily (+20% step velocity gain).', history: 'Baseline PHQ-9: 16. Enrolled 3 days post-discharge. Mobility increasing steadily.' }
+  ]
+
+  const filteredPatients = patients.filter(p => {
+    const matchesFilter = filter === 'ALL' || (filter === 'ALERT' && p.flag) || (filter === 'ATTENDING' && !p.flag)
+    const matchesSearch = searchQuery === '' || p.id.toLowerCase().includes(searchQuery.toLowerCase()) || p.pseudonym.toLowerCase().includes(searchQuery.toLowerCase()) || p.alert.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesFilter && matchesSearch
+  })
+
+  const activeP = patients.find(p => p.id === selectedPatient) || patients[1]
+
+  return (
+    <div className="clinician-panel" style={{ background: '#0A0D14', border: '1px solid rgba(0, 85, 255, 0.4)', borderRadius: '24px', padding: '2.5rem', boxShadow: '0 24px 64px rgba(0, 85, 255, 0.15)', fontFamily: 'var(--mono)' }}>
+      
+      {/* Triage Status & Command KPI Bar with Icons & AI Indicator */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem', borderBottom: '1px solid #1E293B', paddingBottom: '2rem' }}>
+        <div style={{ background: '#0F172A', border: '1px solid #1E293B', borderRadius: '12px', padding: '1.2rem' }}>
+          <span style={{ fontSize: '0.72rem', color: '#64748B', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.3rem' }}>
+            <IconUsers size={14} color="#38BDF8" /> ACTIVE PILOT COHORT
+          </span>
+          <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#F8FAFC' }}>50 <span style={{ fontSize: '0.9rem', color: '#38BDF8', fontWeight: 600 }}>Patients</span></span>
+        </div>
+        <div 
+          onClick={() => setFilter('ATTENDING')}
+          style={{ background: filter === 'ATTENDING' ? 'rgba(52, 199, 89, 0.15)' : '#0F172A', border: filter === 'ATTENDING' ? '1px solid #34C759' : '1px solid #1E293B', borderRadius: '12px', padding: '1.2rem', cursor: 'pointer', transition: 'all 0.2s ease' }}
+        >
+          <span style={{ fontSize: '0.72rem', color: '#64748B', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.3rem' }}>
+            <IconCheck size={14} color="#34C759" /> ATTENDING & ENGAGED
+          </span>
+          <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#34C759' }}>45 <span style={{ fontSize: '0.8rem', color: '#94A3B8' }}>(90% Retention)</span></span>
+        </div>
+        <div 
+          onClick={() => setFilter('ALERT')}
+          style={{ background: filter === 'ALERT' ? 'rgba(255, 69, 58, 0.15)' : '#0F172A', border: filter === 'ALERT' ? '1px solid #FF453A' : '1px solid #1E293B', borderRadius: '12px', padding: '1.2rem', cursor: 'pointer', transition: 'all 0.2s ease' }}
+        >
+          <span style={{ fontSize: '0.72rem', color: '#FF6B6B', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.3rem' }}>
+            <IconAlert size={14} color="#FF453A" /> ⚠️ CRITICAL TRIAGE ALERTS
+          </span>
+          <span style={{ fontSize: '1.8rem', fontWeight: 800, color: '#FF453A' }}>2 <span style={{ fontSize: '0.8rem', color: '#FCA5A5' }}>(Require Call)</span></span>
+        </div>
+        <div style={{ background: '#0F172A', border: '1px solid #0055FF', borderRadius: '12px', padding: '1.2rem' }}>
+          <span style={{ fontSize: '0.72rem', color: '#66A1FF', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.3rem', fontWeight: 700 }}>
+            <IconAI size={14} color="#66A1FF" /> FITI TRIAGE-AI™ ENGINE
+          </span>
+          <span style={{ fontSize: '1.05rem', fontWeight: 700, color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '0.4rem' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34C759' }} /> 4 Multi-Modal Vectors Active
+          </span>
+        </div>
+      </div>
+
+      {/* Filter and Search Triage Bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {[
+            ['ALL', 'All Patients (6)'],
+            ['ALERT', '⚠️ Flagged / At Risk (2)'],
+            ['ATTENDING', '✅ Attending (4)']
+          ].map(([k, label]) => (
+            <button
+              key={k}
+              onClick={() => setFilter(k)}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                background: filter === k ? '#1E293B' : 'transparent',
+                border: filter === k ? '1px solid #38BDF8' : '1px solid #1E293B',
+                color: filter === k ? '#38BDF8' : '#94A3B8',
+                fontWeight: 700,
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              {k === 'ALERT' ? <IconAlert size={14} color={filter === k ? '#FF453A' : '#94A3B8'} /> : <IconUsers size={14} color={filter === k ? '#38BDF8' : '#94A3B8'} />}
+              {label}
+            </button>
+          ))}
+        </div>
+        <div>
+          <input
+            type="text"
+            placeholder="🔍 Search Patient ID or Alert..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              background: '#0F172A',
+              border: '1px solid #1E293B',
+              borderRadius: '8px',
+              padding: '0.5rem 1rem',
+              color: '#F8FAFC',
+              fontSize: '0.8rem',
+              fontFamily: 'var(--mono)',
+              minWidth: '240px',
+              outline: 'none'
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Main Clinical Command Layout: Left Data Grid + Right Patient Triage Drawer */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.35fr 1fr', gap: '2rem', alignItems: 'start' }}>
+        
+        {/* Left: Enterprise Clinical Data Grid with AI Column */}
+        <div style={{ background: '#0F172A', border: '1px solid #1E293B', borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ background: '#1E293B', padding: '0.85rem 1.2rem', display: 'grid', gridTemplateColumns: '1fr 80px 110px 120px', fontWeight: 700, fontSize: '0.72rem', color: '#94A3B8', letterSpacing: '0.05em' }}>
+            <span>PATIENT & ALERT FLAG</span>
+            <span style={{ textAlign: 'right' }}>PHQ-9 / Δ</span>
+            <span style={{ textAlign: 'right' }}>MOBILITY</span>
+            <span style={{ textAlign: 'right', color: '#38BDF8' }}>✨ AI ED RISK</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {filteredPatients.map((p, i) => (
+              <div
+                key={i}
+                onClick={() => { setSelectedPatient(p.id); setActionStatus(''); setShowFhirModal(false) }}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 80px 110px 120px',
+                  alignItems: 'center',
+                  padding: '1rem 1.2rem',
+                  borderBottom: i < filteredPatients.length - 1 ? '1px solid #1E293B' : 'none',
+                  background: selectedPatient === p.id ? 'rgba(56, 189, 248, 0.12)' : (p.flag ? 'rgba(255, 69, 58, 0.04)' : 'transparent'),
+                  borderLeft: selectedPatient === p.id ? '4px solid #38BDF8' : (p.flag ? '4px solid #FF453A' : '4px solid transparent'),
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#F8FAFC' }}>{p.id}</span>
+                    <span style={{ fontSize: '0.68rem', color: '#64748B' }}>({p.pseudonym})</span>
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: p.flag ? '#FF6B6B' : '#34C759', marginTop: '0.2rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {p.flag ? <IconAlert size={12} color="#FF6B6B" /> : <IconCheck size={12} color="#34C759" />}
+                    {p.status} · {p.alert}
+                  </div>
                 </div>
-              ))}
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#F8FAFC' }}>{p.phq}</div>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: p.delta.includes('−') ? '#34C759' : (p.delta === 'Δ 0' ? '#94A3B8' : '#FF453A') }}>{p.delta}</div>
+                </div>
+                <div style={{ textAlign: 'right', fontSize: '0.78rem', color: p.flag ? '#FF6B6B' : '#CBD5E1', fontWeight: p.flag ? 700 : 500 }}>
+                  {p.steps.split(' ')[0]}
+                </div>
+                <div style={{ textAlign: 'right', fontSize: '0.78rem', fontWeight: 800, color: p.edRisk.includes('🔴') ? '#FF453A' : (p.edRisk.includes('🟡') ? '#FDBA74' : '#38BDF8') }}>
+                  {p.edRisk.split(' ')[0]} {p.edRisk.split(' ')[1]}
+                </div>
+              </div>
+            ))}
+            {filteredPatients.length === 0 && (
+              <div style={{ padding: '2.5rem', textAlign: 'center', color: '#64748B', fontSize: '0.85rem' }}>
+                No patients match the current filter criteria.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Comprehensive Patient Triage & Protocol Center with AI Script Generator */}
+        <div style={{ background: '#0F172A', border: '1px solid #1E293B', borderRadius: '16px', padding: '1.8rem', position: 'sticky', top: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #1E293B', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+            <div>
+              <span style={{ fontSize: '0.72rem', color: activeP.flag ? '#FF6B6B' : '#38BDF8', fontWeight: 800, letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {activeP.flag ? <IconAlert size={14} color="#FF6B6B" /> : <IconCheck size={14} color="#38BDF8" />}
+                {activeP.flag ? '⚠️ HIGH PRIORITY TRIAGE CASE' : '✅ ACTIVE MONITORING CASE'}
+              </span>
+              <h4 style={{ fontSize: '1.4rem', color: '#F8FAFC', margin: '0.3rem 0 0.1rem 0', fontWeight: 800 }}>
+                {activeP.id} <span style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600 }}>{activeP.pseudonym}</span>
+              </h4>
+            </div>
+            <span style={{ background: activeP.flag ? 'rgba(255, 69, 58, 0.2)' : 'rgba(52, 199, 89, 0.2)', color: activeP.flag ? '#FF453A' : '#34C759', padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>
+              {activeP.status}
+            </span>
+          </div>
+
+          {/* Clinical Telemetry Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.85rem', marginBottom: '1.25rem' }}>
+            <div style={{ background: '#1E293B', padding: '0.85rem', borderRadius: '10px' }}>
+              <span style={{ fontSize: '0.68rem', color: '#94A3B8', display: 'block' }}>PHQ-9 Depression Score</span>
+              <span style={{ fontSize: '1.15rem', fontWeight: 800, color: activeP.phq >= 14 ? '#FF6B6B' : '#F8FAFC' }}>
+                {activeP.phq} <span style={{ fontSize: '0.75rem', color: activeP.delta.includes('−') ? '#34C759' : '#FF6B6B' }}>({activeP.delta})</span>
+              </span>
+            </div>
+            <div style={{ background: '#1E293B', padding: '0.85rem', borderRadius: '10px' }}>
+              <span style={{ fontSize: '0.68rem', color: '#94A3B8', display: 'block' }}>UCLA-3 Isolation Index</span>
+              <span style={{ fontSize: '1.15rem', fontWeight: 800, color: activeP.isolation.includes('High') ? '#FF6B6B' : '#34C759' }}>
+                {activeP.isolation}
+              </span>
+            </div>
+            <div style={{ background: '#1E293B', padding: '0.85rem', borderRadius: '10px', gridColumn: '1 / -1' }}>
+              <span style={{ fontSize: '0.68rem', color: '#94A3B8', display: 'block' }}>Apple Health Mobility & Step Telemetry</span>
+              <span style={{ fontSize: '1rem', fontWeight: 700, color: activeP.flag ? '#FF6B6B' : '#F8FAFC' }}>
+                {activeP.steps}
+              </span>
             </div>
           </div>
 
-          <div className="aud-aside">
-            <div className="aud-aside-head">
-              <span>CLINICAL & ACTUARIAL BENCHMARK</span>
-              <span className="aud-aside-badge">LITERATURE-BACKED</span>
+          {/* ✨ AI Triage Briefing & Call Script Generator */}
+          <div style={{ background: 'linear-gradient(135deg, #0D1B2A 0%, #1B263B 100%)', border: '1px solid #38BDF8', borderRadius: '12px', padding: '1.1rem', marginBottom: '1.5rem', boxShadow: '0 8px 24px rgba(56, 189, 248, 0.12)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '0.72rem', color: '#38BDF8', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <IconAI size={15} color="#38BDF8" /> FITI CARE-AI™ TRIAGE BRIEFING & CALL SCRIPT
+              </span>
+              <span style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38BDF8', fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px' }}>
+                ED Risk: {activeP.edRisk}
+              </span>
             </div>
-            <div className="aud-aside-body">
-              {d.metrics.map((m, i) => (
-                <div key={i} className="aud-metric-block">
-                  <h4>{m.n}</h4>
-                  <p className="aud-metric-label">{m.l}</p>
-                  <p className="aud-metric-note">{m.note}</p>
+            <p style={{ fontSize: '0.82rem', color: '#E2E8F0', lineHeight: 1.5, margin: '0 0 0.6rem 0' }}>
+              <strong style={{ color: '#fff' }}>Telemetry Synthesis:</strong> {activeP.aiNote}
+            </p>
+            <div style={{ background: '#0A0D14', borderLeft: '3px solid #38BDF8', padding: '0.75rem', borderRadius: '0 6px 6px 0', fontSize: '0.78rem', color: '#93C5FD', fontStyle: 'italic' }}>
+              💡 <strong>AI Suggested Warm Call Script:</strong> "Start by asking about weekend physical comfort/knee stiffness before suggesting volunteer ride coordination for Tuesday's walk. Avoid direct clinical depression terminology."
+            </div>
+          </div>
+
+          {/* Interactive Protocol Action Buttons with Icons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <button
+              onClick={() => setActionStatus('Outreach logged: Spoke with Robert T. and scheduled local community ride support for next meetup.')}
+              style={{
+                background: '#38BDF8',
+                color: '#0F172A',
+                border: 'none',
+                padding: '0.75rem 1rem',
+                borderRadius: '8px',
+                fontWeight: 800,
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <IconPhoneCall size={16} color="#0F172A" /> Log Care Coordinator Outreach
+            </button>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={() => setActionStatus('Dispatching automated Stream Chat care check-in ping to member mobile device... [DELIVERED]')}
+                style={{
+                  flex: 1,
+                  background: '#1E293B',
+                  color: '#F8FAFC',
+                  border: '1px solid #334155',
+                  padding: '0.7rem',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
+              >
+                <IconChat size={14} color="#F8FAFC" /> Send Stream Chat Ping
+              </button>
+              <button
+                onClick={() => setShowFhirModal(!showFhirModal)}
+                style={{
+                  flex: 1,
+                  background: '#1E293B',
+                  color: '#38BDF8',
+                  border: '1px solid #38BDF8',
+                  padding: '0.7rem',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
+              >
+                <IconCode size={14} color="#38BDF8" /> {showFhirModal ? 'Hide FHIR R4 JSON' : 'Inspect FHIR R4 JSON'}
+              </button>
+            </div>
+          </div>
+
+          {/* Status Feedback Banner */}
+          {actionStatus && (
+            <div style={{ marginTop: '1rem', background: 'rgba(52, 199, 89, 0.15)', border: '1px solid #34C759', borderRadius: '8px', padding: '0.85rem', fontSize: '0.8rem', color: '#34C759', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <IconCheck size={16} color="#34C759" /> {actionStatus}
+            </div>
+          )}
+
+          {/* FHIR R4 JSON Modal / Drawer Preview */}
+          {showFhirModal && (
+            <div style={{ marginTop: '1.25rem', background: '#05050A', border: '1px solid #334155', borderRadius: '10px', padding: '1.1rem', fontSize: '0.75rem', fontFamily: 'var(--mono)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#38BDF8', marginBottom: '0.5rem', fontWeight: 700, alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconCode size={14} color="#38BDF8" /> HL7 FHIR R4 Observation Payload</span>
+                <span>STATUS: FINAL</span>
+              </div>
+              <pre style={{ margin: 0, color: '#A5B4FC', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>{`{
+  "resourceType": "Observation",
+  "id": "fiti-phq9-${activeP.pseudonym}",
+  "status": "final",
+  "code": { "system": "http://loinc.org", "code": "44261-6", "display": "PHQ-9 total score" },
+  "subject": { "reference": "Patient/${activeP.pseudonym}" },
+  "effectiveDateTime": "${new Date().toISOString().split('T')[0]}T08:00:00Z",
+  "valueInteger": ${activeP.phq},
+  "note": "${activeP.history}"
+}`}</pre>
+            </div>
+          )}
+
+        </div>
+
+      </div>
+
+      {/* Footer Specs with Icons */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid #1E293B', fontSize: '0.75rem', color: '#64748B' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconDashboard size={14} color="#64748B" /> Web PWA · Zero hospital desktop installation required</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconCode size={14} color="#64748B" /> Exportable CSV & HL7 FHIR R4 Observation records</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><IconShield size={14} color="#64748B" /> HIPAA BAA & Row-Level Security Enforced</span>
+      </div>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PILOT MODELER — INTERACTIVE COHORT & PMPM SIMULATOR
+   ═══════════════════════════════════════════════════════════════════════════ */
+function PilotModeler() {
+  const [cohortSize, setCohortSize] = useState(200)
+  const [segment, setSegment] = useState('older')
+  const [rh, hv] = useInView()
+
+  // Modeled metrics from systematic reviews (fiti_validation_report.md)
+  const pmpm = segment === 'older' ? 8 : 6
+  const annualInvest = cohortSize * pmpm * 12
+  const baselineEDRate = segment === 'older' ? 0.678 : 0.42 // visits per member-year
+  const edReductionPct = segment === 'older' ? 0.18 : 0.15 // conservative 15-18% reduction benchmark
+  const avoidedEDVisits = Math.round(cohortSize * baselineEDRate * edReductionPct)
+  const edCostPerVisit = 2100 // conservative ED visit cost
+  const annualSavings = avoidedEDVisits * edCostPerVisit
+  const netImpact = annualSavings - annualInvest
+
+  return (
+    <section className="modeler-sec sec" id="modeler" style={{ background: '#0A0806', borderBottom: '1px solid var(--border)', padding: '5rem 0' }}>
+      <div className="wrap">
+        <div ref={rh} className={`sec-hdr snap${hv ? ' in' : ''}`}>
+          <span className="sec-tag">05 · PILOT & PMPM MODELER</span>
+          <h2>Simulate your cohort economics.<br />Transparent, conservative benchmarks.</h2>
+          <p>
+            Adjust your target cohort size and clinical population to preview modeled group matching cost efficiencies (`10× vs 1:1 companionship`), projected emergency department avoidance, and PMPM economics.
+          </p>
+        </div>
+
+        <div style={{ background: 'var(--warm-card)', border: '1px solid var(--warm-border)', borderRadius: '16px', padding: '2.5rem', marginTop: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', alignItems: 'center' }}>
+            
+            {/* Controls */}
+            <div>
+              <div style={{ marginBottom: '1.8rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontFamily: 'var(--mono)', color: 'var(--amber)', fontWeight: 700, marginBottom: '0.6rem' }}>
+                  TARGET POPULATION SEGMENT
+                </label>
+                <div style={{ display: 'flex', gap: '0.6rem' }}>
+                  <button
+                    onClick={() => setSegment('older')}
+                    style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', background: segment === 'older' ? 'var(--amber)' : '#1C1C1E', color: segment === 'older' ? '#0A0806' : '#F5F5F7', border: 'none', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}
+                  >
+                    Older Adults / Chronic Care ($8 PMPM)
+                  </button>
+                  <button
+                    onClick={() => setSegment('workforce')}
+                    style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', background: segment === 'workforce' ? 'var(--amber)' : '#1C1C1E', color: segment === 'workforce' ? '#0A0806' : '#F5F5F7', border: 'none', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer' }}
+                  >
+                    Employer / SDOH ($6 PMPM)
+                  </button>
                 </div>
-              ))}
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                  <label style={{ fontSize: '0.8rem', fontFamily: 'var(--mono)', color: 'var(--amber)', fontWeight: 700 }}>
+                    PILOT COHORT SIZE (ACTIVE MEMBERS)
+                  </label>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F5F5F7', fontFamily: 'var(--mono)' }}>{cohortSize.toLocaleString()}</span>
+                </div>
+                <input
+                  type="range"
+                  min={30}
+                  max={2400}
+                  step={10}
+                  value={cohortSize}
+                  onChange={e => setCohortSize(+e.target.value)}
+                  style={{ width: '100%', accentColor: 'var(--amber)', cursor: 'pointer' }}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#636366', marginTop: '0.4rem', fontFamily: 'var(--mono)' }}>
+                  <span>30 (Initial Pilot)</span>
+                  <span>500 (Hospital Cohort)</span>
+                  <span>2,400 (Scale)</span>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '2rem', background: '#12100E', border: '1px solid #2C2C2E', borderRadius: '10px', padding: '1rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--amber)', fontFamily: 'var(--mono)', fontWeight: 700, display: 'block' }}>WHY FI-TI VS PAPA?</span>
+                <p style={{ fontSize: '0.82rem', color: '#C7C7CC', margin: '0.4rem 0 0 0', lineHeight: 1.5 }}>
+                  1:1 human companionship services cost ~$200+/month per member. FiTi's AI-matched group circles scale at just ${pmpm} PMPM—delivering <strong>10× to 25× software cost efficiency</strong> while measuring validated PHQ-9 improvements.
+                </p>
+              </div>
             </div>
+
+            {/* Results Display */}
+            <div style={{ background: '#0A0806', border: '1px solid #2C2C2E', borderRadius: '14px', padding: '2rem' }}>
+              <div style={{ fontSize: '0.75rem', fontFamily: 'var(--mono)', color: '#8E8E93', letterSpacing: '0.05em', marginBottom: '1.2rem' }}>
+                MODELED ANNUAL PROJECTIONS ({cohortSize} MEMBERS)
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.8rem' }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#8E8E93', display: 'block' }}>Annual Platform Investment</span>
+                  <span style={{ fontSize: '1.35rem', fontWeight: 800, color: '#F5F5F7', fontFamily: 'var(--mono)' }}>${annualInvest.toLocaleString()}</span>
+                  <span style={{ fontSize: '0.72rem', color: '#636366', display: 'block', marginTop: '0.2rem' }}>at ${pmpm} PMPM</span>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: '#8E8E93', display: 'block' }}>Avoided ED Visits (Modeled)</span>
+                  <span style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0055FF', fontFamily: 'var(--mono)' }}>~{avoidedEDVisits} visits</span>
+                  <span style={{ fontSize: '0.72rem', color: '#636366', display: 'block', marginTop: '0.2rem' }}>{(edReductionPct * 100).toFixed(0)}% benchmark reduction</span>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid #1C1C1E', paddingTop: '1.5rem' }}>
+                <span style={{ fontSize: '0.78rem', color: '#8E8E93', display: 'block' }}>Modeled Annual Medical Cost Avoidance</span>
+                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: netImpact >= 0 ? '#34C759' : '#F5F5F7', fontFamily: 'var(--mono)', margin: '0.2rem 0' }}>
+                  ${annualSavings.toLocaleString()}
+                </div>
+                <div style={{ fontSize: '0.82rem', color: '#C7C7CC' }}>
+                  Estimated Net Impact: <strong style={{ color: netImpact >= 0 ? '#34C759' : '#FF453A' }}>{netImpact >= 0 ? '+' : ''}${netImpact.toLocaleString()}</strong> per year
+                </div>
+              </div>
+
+              <div style={{ marginTop: '1.5rem', fontSize: '0.72rem', color: '#636366', lineHeight: 1.4, borderTop: '1px dashed #1C1C1E', paddingTop: '1rem' }}>
+                * Note: All figures are conservative illustrative projections modeled from systematic health economics reviews (WHO 2025, Cené et al. AHA 2022). Actual cohort outcomes and cost avoidance are verified post-pilot via live FHIR Observation exports.
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -657,54 +1335,110 @@ function Audiences() {
   )
 }
 
-/* ═════════════════════════════════════════════════════════════
-   FAQ
-   ═════════════════════════════════════════════════════════════ */
-const FAQS = [
-  {
-    q: 'What data do you collect and where is it stored?',
-    a: 'We collect wellbeing check-in responses (PHQ-9, UCLA-3), engagement metrics (group attendance, app usage), and optional wearable data (steps, sleep). All data is stored in HIPAA-compliant infrastructure with encryption at rest and in transit. We sign Business Associate Agreements with all partners. No data is sold or shared outside the clinical relationship.'
-  },
-  {
-    q: "What's the actual integration effort for a pilot?",
-    a: 'Zero. The 90-day pilot runs as a standalone programme — no EHR integration required. We handle member enrolment directly. For full deployment, we integrate via HL7 FHIR R4 (Epic, Cerner/Oracle, Athena). A typical EHR integration takes 4–6 weeks with your IT team.'
-  },
-  {
-    q: 'What happens after the 90-day pilot?',
-    a: "You receive a full outcome report: PHQ-9 score changes, engagement rates, projected ER utilisation reduction, and a cost-avoidance estimate based on your population's baseline claims. If the numbers justify it, we move to full deployment. If they don't, you walk — no lock-in."
-  },
-  {
-    q: 'How does pricing work?',
-    a: "Pricing is per-member-per-month (PMPM), scaled by population size. For populations under 5,000, expect $6–8 PMPM. For 25,000+, pricing drops to $4–6. We also offer shared-savings models for risk-bearing contracts where our fee is partially tied to measured outcomes."
-  },
-  {
-    q: 'Do you have IRB approval?',
-    a: "We provide a complete IRB protocol package (study design, consent forms, data handling procedures) that's been reviewed and approved at partner sites. Each site submits to their own IRB — we support the process and provide all required documentation."
-  },
-]
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUDIENCES / PARTNERS — LASER FOCUS ON 90-DAY PILOTS & VALUE-BASED CARE
+   ═══════════════════════════════════════════════════════════════════════════ */
+function Audiences() {
+  const [rh, hv] = useInView()
+  const [rg, gv] = useInView()
 
-function FAQ() {
-  const [openIdx, setOpenIdx] = useState(-1)
-  const rh = useInView()
-  const rl = useInView()
+  const AUDS = [
+    {
+      tag: 'HEALTH SYSTEMS & HOSPITALS',
+      head: 'Turn loneliness screenings into an active intervention pathway.',
+      body: 'Your primary care clinics and discharge planners screen for social determinants daily. Give them a direct referral destination that tracks patient attendance and PHQ-9 improvements across a structured 90-day pilot.',
+      items: [
+        'Standalone care coordinator dashboard — no upfront IT queue',
+        'Real-time tracking of PHQ-9 & UCLA-3 trajectory',
+        'IRB-ready protocol template and data governance',
+        'Targeted reduction in preventable ED re-admissions',
+      ],
+    },
+    {
+      tag: 'PAYERS & SELF-INSURED EMPLOYERS',
+      head: 'Address the upstream social driver behind excess claims spend.',
+      body: 'Isolated members incur significantly higher medical claims and ER visits. FiTi delivers scalable community circles at $5–8 PMPM—a fraction of the cost of 1:1 companionship models.',
+      items: [
+        'Predictable PMPM pricing tied to active cohort size',
+        'Scalable software-matched group circles vs costly 1:1 visits',
+        'Quarterly actuarial reporting on engagement and outcomes',
+        'Designed to support value-based care risk contracts',
+      ],
+    },
+    {
+      tag: 'RESEARCH INSTITUTIONS',
+      head: 'Generate longitudinal behavioral health datasets ethically.',
+      body: 'Launch institutional studies with our pre-built infrastructure. Track community formation, retention, and validated psychological metrics across diverse demographic populations.',
+      items: [
+        'Standardized LOINC and FHIR data structure',
+        'Configurable bi-weekly ecological momentary assessment (EMA)',
+        'Full CSV and JSON data export with audit trails',
+        'Collaborative research partnership models available',
+      ],
+    },
+  ]
 
   return (
-    <section className="faq sec" id="faq">
+    <section className="audiences sec" id="audiences">
       <div className="wrap">
-        <div ref={rh} className="faq-header fade-up">
-          <span className="ch">PROCUREMENT & COMPLIANCE</span>
-          <h2>Questions we get asked.</h2>
-          <p>Real objections from health system executives and compliance teams. Here are the answers.</p>
+        <div ref={rh} className={`sec-hdr snap${hv ? ' in' : ''}`}>
+          <span className="sec-tag">06 · PARTNERS & ROADMAP</span>
+          <h2>Built for institutional rigor.<br />Structured to eliminate pilotitis.</h2>
+          <p>
+            To protect both your clinical operations and our unit economics from open-ended pilot fatigue, FiTi operates on a transparent, three-stage commercial and integration roadmap.
+          </p>
         </div>
-        <div ref={rl} className="faq-list fade-up d1">
-          {FAQS.map((f, i) => (
-            <div className={`faq-item${openIdx === i ? ' open' : ''}`} key={i}>
-              <button className="faq-q" onClick={() => setOpenIdx(openIdx === i ? -1 : i)} aria-expanded={openIdx === i}>
-                <span>{f.q}</span>
-                <ChevronDown />
-              </button>
-              <div className="faq-a">
-                <p>{f.a}</p>
+
+        {/* 3-Stage Commercial & Clinical Roadmap */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '4rem' }}>
+          {[
+            {
+              stage: 'STAGE 1 · PROVE IT (MONTHS 1–5)',
+              title: 'The $0 / Zero-EHR-Delay Pilot',
+              desc: 'We deploy immediately as a standalone web PWA + Flutter mobile app for a 30–100 patient cohort. Zero hospital desktop installation, zero EHR administrative queue, and $0 upfront integration fees. We measure real PHQ-9 & UCLA-3 trajectory.',
+              badge: 'ACTIVE PILOT PROTOCOL'
+            },
+            {
+              stage: 'STAGE 2 · SCALE IT (MONTHS 6–12)',
+              title: 'Enterprise PMPM & EHR Connection Hub',
+              desc: 'Following validated pilot outcome milestones, contracts convert to predictable $5–8 PMPM pricing. We initiate SOC2 Type II audit certification and connect our HL7 FHIR R4 API directly to your Epic Showroom / Connection Hub workflows.',
+              badge: 'EPIC SHOWROOM / CONNECTION HUB TARGET'
+            },
+            {
+              stage: 'STAGE 3 · DEFEND IT (YEAR 2+)',
+              title: 'Value-Based Care Shared Savings',
+              desc: 'With longitudinal cohort data proving Emergency Department (ED) avoidance and sustained behavioral health gains, FiTi transitions into value-based risk contracts and shared savings arrangements with payers and self-insured employers.',
+              badge: 'VALUE-BASED CARE ALIGNMENT'
+            }
+          ].map((r, i) => (
+            <div key={i} style={{ background: '#12100E', border: '1px solid #2C2C2E', borderRadius: '14px', padding: '1.8rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontFamily: 'var(--mono)', color: 'var(--amber)', fontWeight: 700, letterSpacing: '0.06em' }}>{r.stage}</span>
+                <h4 style={{ fontSize: '1.15rem', color: '#F5F5F7', margin: '0.5rem 0 0.8rem 0', fontWeight: 700 }}>{r.title}</h4>
+                <p style={{ fontSize: '0.85rem', color: '#C7C7CC', lineHeight: 1.6, margin: 0 }}>{r.desc}</p>
+              </div>
+              <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px dashed #1C1C1E' }}>
+                <span style={{ fontSize: '0.7rem', fontFamily: 'var(--mono)', background: 'rgba(224, 138, 62, 0.12)', color: 'var(--amber)', padding: '0.35rem 0.65rem', borderRadius: '6px', fontWeight: 600 }}>
+                  {r.badge}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div ref={rg} className={`aud-grid snap${gv ? ' in' : ''}`}>
+          {AUDS.map((a, i) => (
+            <div className="aud-card" key={i}>
+              <div className="ac-tag">{a.tag}</div>
+              <h3 className="ac-head">{a.head}</h3>
+              <p className="ac-body">{a.body}</p>
+              <div className="ac-list">
+                {a.items.map((item, j) => (
+                  <div className="ac-item" key={j}>
+                    <span className="ac-mark">→</span>
+                    <span>{item}</span>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
@@ -714,302 +1448,193 @@ function FAQ() {
   )
 }
 
-/* ═════════════════════════════════════════════════════════════
-   EVIDENCE & TECHNICAL SPECIFICATIONS
-   ═════════════════════════════════════════════════════════════ */
-function Evidence() {
-  const rl = useInView()
-  const rr = useInView()
-  const [showConfig, setShowConfig] = useState(false)
+/* ═══════════════════════════════════════════════════════════════════════════
+   FAQ — REALISTIC, VALIDATED, HONEST ANSWERS
+   ═══════════════════════════════════════════════════════════════════════════ */
+function FAQ() {
+  const [open, setOpen] = useState(null)
+  const [rh, hv] = useInView()
+
+  const QS = [
+    {
+      q: 'How does the 90-day pilot work, and what is required from our IT team?',
+      a: 'The 90-day pilot requires zero EHR integration or IT installation. We provide a standalone, secure care coordinator web dashboard and enroll an initial cohort of 30–100 patients. Your team gets weekly attendance insights and a full PHQ-9/UCLA-3 pre- and post-intervention outcome report.',
+    },
+    {
+      q: 'When and how does FiTi integrate with our EHR (Epic/Cerner) and meet SOC2 Type II requirements?',
+      a: 'During Stage 1 (the 90-day pilot), we operate standalone to avoid your 6–18 month EHR administrative queue. As the pilot validates outcomes, our backend generates standard HL7 FHIR R4 Observation structures, preparing us for direct workflow integration via the Epic Showroom / Connection Hub in Stage 2 scaling. Concurrently, we initiate our SOC2 Type II audit roadmap to support health system enterprise procurement.',
+    },
+    {
+      q: 'How does FiTi differentiate from 1:1 companionship services like Papa?',
+      a: '1:1 companionship services rely on paying human workers for individual home visits, making them expensive ($20+ per hour) and difficult to scale. FiTi uses software to match members into small, self-sustaining community circles (like walking groups or coffee meetups). This group-based peer connection is inherently more scalable, highly cost-effective ($5–8 PMPM), and tracks longitudinal clinical outcomes.',
+    },
+    {
+      q: 'What data does FiTi track on the member phone?',
+      a: 'We strictly collect explicit responses from bi-weekly check-ins (PHQ-9 and UCLA-3 items) and optional aggregate step/movement trends via Apple Health / Google Fit to notice sustained drops in physical activity. We never scrape call logs, raw GPS coordinates, or private messages.',
+    },
+    {
+      q: 'Is FiTi an FDA-cleared Software as a Medical Device (SaMD)?',
+      a: 'No. FiTi operates as a population health monitoring and social engagement platform, not a diagnostic device. We do not claim to diagnose or treat medical disorders independently. All assessments and risk alerts are tools to inform human care coordinators within your clinical workflow.',
+    },
+    {
+      q: 'What is the pricing model after a successful pilot?',
+      a: 'Production contracts are structured on a Per-Member-Per-Month (PMPM) basis, typically ranging from $5 to $8 PMPM depending on cohort volume and reporting requirements, or value-based shared savings models.',
+    },
+  ]
 
   return (
-    <section className="evidence sec" id="evidence">
+    <section className="faq sec" id="faq">
       <div className="wrap">
-        <div className="ev-inner">
-          <div ref={rl} className="ev-left fade-up">
-            <span className="ch">CLINICAL MEASUREMENT</span>
-            <h2>We measure the things<br />that matter.</h2>
-            <p>
-              No proprietary wellness scores. FiTi uses the same validated clinical instruments
-              that primary care physicians, researchers, and actuaries already rely on.
-            </p>
-            <div className="ev-instruments">
-              <div className="ev-inst">
-                <span className="ev-badge badge-coral">PHQ-9</span>
-                <div className="ev-inst-info">
-                  <h4>Patient Health Questionnaire-9</h4>
-                  <p>Depression severity — the global clinical standard</p>
+        <div ref={rh} className={`sec-hdr snap${hv ? ' in' : ''}`}>
+          <span className="sec-tag">FREQUENTLY ASKED QUESTIONS</span>
+          <h2>Clear answers for clinical & executive teams.</h2>
+        </div>
+        <div className="faq-list">
+          {QS.map((q, i) => (
+            <div className={`faq-item${open === i ? ' faq-open' : ''}`} key={i}>
+              <button className="faq-q-btn" id={`faq-q-${i}`} onClick={() => setOpen(open === i ? null : i)}>
+                <span className="faq-prompt">{'>'}</span>
+                <span className="faq-qtext">{q.q}</span>
+                <span className="faq-chevron">{open === i ? '↑' : '↓'}</span>
+              </button>
+              {open === i && (
+                <div className="faq-a" id={`faq-a-${i}`}>
+                  <span className="faq-a-prefix">// </span>
+                  {q.a}
                 </div>
-              </div>
-              <div className="ev-inst">
-                <span className="ev-badge badge-teal">UCLA-3</span>
-                <div className="ev-inst-info">
-                  <h4>UCLA Loneliness Scale (3-Item)</h4>
-                  <p>Social isolation, validated across diverse patient populations</p>
-                </div>
-              </div>
+              )}
             </div>
-            <p className="ev-footnote">
-              Outcome data is collected bi-weekly and stored in HIPAA-compliant
-              in-region infrastructure. Claims linkage available via Business Associate Agreement.
-            </p>
-          </div>
-
-          <div ref={rr} className="fade-up d1">
-            {/* PHQ-9 trajectory chart */}
-            <div className="phq-chart">
-              <div className="phq-chart-head">
-                <span className="phq-chart-title">PHQ-9 Trajectory — Modeled Pilot Benchmark</span>
-                <span className="phq-chart-badge">Illustrative model</span>
-              </div>
-
-              <svg viewBox="0 0 400 160" fill="none" className="phq-svg">
-                <line x1="45" y1="15" x2="45" y2="130" stroke="#1E2A3E" strokeWidth="1" />
-                <line x1="45" y1="130" x2="385" y2="130" stroke="#1E2A3E" strokeWidth="1" />
-                {[35, 60, 85, 110].map(y => (
-                  <line key={y} x1="45" y1={y} x2="385" y2={y} stroke="#1E2A3E" strokeWidth=".5" strokeDasharray="3,3" />
-                ))}
-                
-                <text x="38" y="38" fontSize="7" fill="#4A5A78" fontFamily="IBM Plex Mono">15</text>
-                <text x="38" y="78" fontSize="7" fill="#4A5A78" fontFamily="IBM Plex Mono">10</text>
-                <text x="38" y="118" fontSize="7" fill="#4A5A78" fontFamily="IBM Plex Mono">5</text>
-                
-                <text x="55" y="145" fontSize="7" fill="#4A5A78" fontFamily="IBM Plex Mono">Wk 0</text>
-                <text x="135" y="145" fontSize="7" fill="#4A5A78" fontFamily="IBM Plex Mono">Wk 4</text>
-                <text x="235" y="145" fontSize="7" fill="#4A5A78" fontFamily="IBM Plex Mono">Wk 8</text>
-                <text x="350" y="145" fontSize="7" fill="#4A5A78" fontFamily="IBM Plex Mono">Wk 12</text>
-                
-                {/* Control group — steady */}
-                <path d="M55,42 C105,44 165,40 225,43 C285,46 345,41 380,44" stroke="#4A5A78" strokeWidth="1.6" strokeDasharray="4,4" />
-                {/* FiTi cohort — declining */}
-                <path d="M55,44 C95,54 135,66 175,78 C215,88 265,99 315,108 C345,113 365,116 380,117" stroke="#D95F3B" strokeWidth="2.4" />
-                <path d="M55,44 C95,54 135,66 175,78 C215,88 265,99 315,108 C345,113 365,116 380,117 L380,130 L55,130 Z" fill="url(#phqGrad)" />
-                
-                <text x="385" y="119" fontSize="7.5" fill="#D95F3B" fontFamily="IBM Plex Mono">-38%</text>
-                <text x="385" y="47" fontSize="7.5" fill="#4A5A78" fontFamily="IBM Plex Mono">ctrl</text>
-
-                <defs>
-                  <linearGradient id="phqGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#D95F3B" stopOpacity="0.14" />
-                    <stop offset="100%" stopColor="#D95F3B" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-              </svg>
-
-              <div className="phq-legend">
-                <span><span className="leg-line" style={{ background: '#D95F3B' }} /> Modeled Cohort (n=203)</span>
-                <span><span className="leg-line" style={{ background: '#4A5A78' }} /> Baseline Control (n=198)</span>
-              </div>
-              <div className="phq-chart-source">
-                * Illustrative trajectory modeled on published social-prescribing benchmarks (JAMA Network Open, 2024). Cohort sizes shown are illustrative, not drawn from a completed FiTi pilot.
-              </div>
-            </div>
-
-            {/* Config toggle */}
-            <button className={`config-toggle${showConfig ? ' open' : ''}`} onClick={() => setShowConfig(!showConfig)}>
-              <ChevronDown /> Technical specifications
-            </button>
-            <div className={`config-block${showConfig ? ' open' : ''}`}>
-              <div className="terminal">
-                <div className="terminal-bar">
-                  <span className="t-dot" /><span className="t-dot" /><span className="t-dot" />
-                  <span className="t-name">fiti_system.config</span>
-                </div>
-                <div className="terminal-body">
-                  <div className="t-line"><span className="t-k">compliance:</span><span className="t-v w">"HIPAA, SOC 2 Type II"</span></div>
-                  <div className="t-line"><span className="t-k">health_data_standard:</span><span className="t-v">"HL7 FHIR R4"</span></div>
-                  <div className="t-line"><span className="t-k">ehr_compatibility:</span><span className="t-v">["Epic", "Cerner", "Athena"]</span></div>
-                  <div className="t-line"><span className="t-k">measurement_cadence:</span><span className="t-v r">"bi-weekly"</span></div>
-                  <div className="t-line"><span className="t-k">validated_instruments:</span><span className="t-v r">["PHQ-9", "UCLA-3"]</span></div>
-                  <div className="t-line"><span className="t-k">data_residency:</span><span className="t-v">"in-region"</span></div>
-                  <div className="t-line"><span className="t-k">pilot_duration:</span><span className="t-v w">"90 days"</span></div>
-                  <div className="t-line"><span className="t-k">ehr_required_for_pilot:</span><span className="t-v w">false</span></div>
-                  <div className="t-line"><span className="t-k">outcomes_export:</span><span className="t-v r">["CSV", "FHIR Bundle", "PDF"]</span></div>
-                  <div className="t-line"><span className="t-k">status:</span><span className="t-v p">"accepting_pilot_cohorts"</span></div>
-                  <div className="t-line"><span className="t-k">{'>'}</span><span className="t-cursor" /></div>
-                </div>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
   )
 }
 
-/* ═════════════════════════════════════════════════════════════
-   CONTACT — Editorial Direct Email Invitation Card
-   ═════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTACT — LASER FOCUS ON THE 90-DAY PILOT LAUNCH
+   ═══════════════════════════════════════════════════════════════════════════ */
 function Contact() {
-  const rl = useInView()
-  const rr = useInView()
-  const [copied, setCopied] = useState(false)
+  const [email, setEmail] = useState('')
+  const [org, setOrg] = useState('')
+  const [role, setRole] = useState('')
+  const [sent, setSent] = useState(false)
+  const [rh, hv] = useInView()
 
-  const copyEmail = () => {
-    navigator.clipboard?.writeText('hello@fitihealth.com')
-    setCopied(true)
-    setTimeout(() => setCopied(false), 3000)
-  }
+  const handle = (e) => { e.preventDefault(); setSent(true) }
 
   return (
-    <section className="contact sec" id="contact">
+    <section className="contact-sec sec" id="contact">
       <div className="wrap">
-        <div className="contact-inner">
-          <div ref={rl} className="contact-left fade-up">
-            <span className="ch">PARTNERSHIP INVITATION</span>
-            <h2>
-              Run a pilot.<br />
-              See verifiable <em>outcomes.</em>
-            </h2>
-            <p>
-              We are accepting pilot partnerships with health systems, self-insured
-              employers, and regional payers. A 90-day pilot requires no EHR integration
-              and delivers a comprehensive actuarial outcome report at completion.
-            </p>
-            <div className="pilot-specs-card">
-              <div className="psc-grid">
-                <div className="psc-item">
-                  <div className="psc-val">90 Days</div>
-                  <div className="psc-lbl">Pilot Timeline</div>
-                </div>
-                <div className="psc-item">
-                  <div className="psc-val">Zero EHR</div>
-                  <div className="psc-lbl">Required to Start</div>
-                </div>
-                <div className="psc-item">
-                  <div className="psc-val">$4–8</div>
-                  <div className="psc-lbl">PMPM Pricing Tier</div>
-                </div>
-                <div className="psc-item">
-                  <div className="psc-val">Full ROI</div>
-                  <div className="psc-lbl">Dossier Delivered</div>
-                </div>
+        <div ref={rh} className={`sec-hdr snap${hv ? ' in' : ''}`}>
+          <span className="sec-tag">06 · PILOT LAUNCH</span>
+          <h2>Request 90-day pilot access.</h2>
+          <p>
+            We are accepting a limited number of 90-day pilot cohorts (30–100 patients) for qualifying hospitals, health systems, and employer health plans. Zero upfront EHR integration required.
+          </p>
+        </div>
+        {!sent ? (
+          <form className="contact-form" onSubmit={handle} id="pilot-request-form">
+            <div className="cf-row">
+              <div className="cf-field">
+                <label className="cf-label" htmlFor="cf-email">WORK EMAIL</label>
+                <input id="cf-email" type="email" className="cf-input" placeholder="name@healthsystem.org"
+                  value={email} onChange={e => setEmail(e.target.value)} required />
+              </div>
+              <div className="cf-field">
+                <label className="cf-label" htmlFor="cf-org">ORGANIZATION</label>
+                <input id="cf-org" type="text" className="cf-input" placeholder="Hospital / Health System / Payer"
+                  value={org} onChange={e => setOrg(e.target.value)} required />
               </div>
             </div>
-
-            <div className="advisor-strip">
-              <img src="./advisor.jpg" alt="Dr. Sarah Mitchell" className="advisor-img" />
-              <div className="advisor-info">
-                <strong>Dr. Sarah Mitchell</strong><br />
-                VP Population Health · Clinical Advisor to FiTi
-              </div>
+            <div className="cf-field" style={{ marginBottom: '1.25rem' }}>
+              <label className="cf-label" htmlFor="cf-role">YOUR ROLE</label>
+              <input id="cf-role" type="text" className="cf-input" placeholder="CMO / VP Population Health / Director of Clinical Operations"
+                value={role} onChange={e => setRole(e.target.value)} />
             </div>
+            <button type="submit" className="cf-submit" id="cf-submit-btn">Request pilot brief & sample protocol →</button>
+            <div className="cf-note">We respond within 48 hours with our IRB-ready protocol template, clinical outcome methodology, and pilot timeline.</div>
+          </form>
+        ) : (
+          <div className="contact-sent" id="contact-confirmation">
+            <div className="cs-check">✓</div>
+            <div className="cs-msg">Pilot request received. Our clinical ops team will send the protocol brief within 48 hours.</div>
+            <div className="cs-ref">REF: {Date.now().toString(36).toUpperCase()}</div>
           </div>
-
-          <div ref={rr} className="fade-up d1">
-            <div className="contact-direct-box">
-              <div className="cdb-eyebrow">DIRECT EXECUTIVE CONTACT</div>
-              <h3 className="cdb-title">Talk directly with our team.</h3>
-              <p className="cdb-sub">
-                Reach out by email to discuss pilot cohort enrollment, pricing structures, or IRB protocol details. We reply within one business day.
-              </p>
-
-              <div className="cdb-email-row">
-                <a
-                  href="mailto:hello@fitihealth.com?subject=FiTi%20Pilot%20Inquiry"
-                  className="cdb-email-address"
-                >
-                  hello@fitihealth.com
-                </a>
-                <button
-                  type="button"
-                  onClick={copyEmail}
-                  className="cdb-copy-icon-btn"
-                  aria-label="Copy email address"
-                  title="Copy email address"
-                >
-                  {copied ? (
-                    <span className="cdb-copied-text">Copied ✓</span>
-                  ) : (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cdb-copy-svg">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                  )}
-                </button>
-              </div>
-
-              <div className="cdb-actions">
-                <a
-                  href="mailto:hello@fitihealth.com?subject=FiTi%20Pilot%20Inquiry"
-                  className="btn btn-warm cdb-btn"
-                >
-                  Email hello@fitihealth.com <Arrow />
-                </a>
-              </div>
-
-              <div className="cdb-footnote">
-                Prefer to schedule directly? Mention your health system or organization size in your email and we will send a direct calendar link.
-              </div>
-            </div>
-          </div>
+        )}
+        <div className="contact-alt">
+          <span>Prefer a direct clinical discussion?</span>
+          <a href="mailto:pilots@fitihealth.com">pilots@fitihealth.com</a>
         </div>
       </div>
     </section>
   )
 }
 
-/* ═════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════════════
    FOOTER
-   ═════════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════════════════════ */
 function Footer() {
+  const year = new Date().getFullYear()
   return (
     <footer className="footer">
       <div className="wrap">
-        <div className="footer-grid">
-          <div className="footer-brand">
-            <a href="#top"><Wordmark size="lg" /></a>
-            <p>Community-based programmes with precision clinical tracking. Built for health systems, payers, and employers.</p>
+        <div className="footer-top">
+          <div className="ft-brand">
+            <div className="ft-logo">
+              <span className="logo-fi">Fi</span>
+              <span className="logo-ti">Ti</span>
+              <span className="logo-dot" />
+            </div>
+            <div className="ft-tagline">Clinical-Grade Social Health Platform</div>
+            <div className="ft-legal">FiTi Health Technologies, Inc.</div>
+            <div className="ft-certs">
+              <span className="ft-cert">HIPAA READY</span>
+              <span className="ft-cert">HL7 FHIR R4</span>
+              <span className="ft-cert">IRB-COMPLIANT</span>
+              <span className="ft-cert">ZERO EHR DELAY PILOT</span>
+            </div>
           </div>
-          <div className="footer-col">
-            <h5>Platform</h5>
-            <a href="#platform">FiTi Connect</a>
-            <a href="#platform">FiTi Clinical</a>
-            <a href="#platform">FiTi Command</a>
-          </div>
-          <div className="footer-col">
-            <h5>Institutional</h5>
-            <a href="#evidence">Clinical Evidence</a>
-            <a href="#faq">Procurement FAQ</a>
-            <a href="#contact">Start a Pilot</a>
-          </div>
-          <div className="footer-col">
-            <h5>Direct Contact</h5>
-            <a href="mailto:hello@fitihealth.com" className="footer-email-link">hello@fitihealth.com</a>
-            <p className="footer-note">
-              We respond within one business day.
-            </p>
+          <div className="ft-nav">
+            {[
+              { head: 'Platform', links: [['#platform','How It Works'],['#security','Clinical & Privacy'],['#interface','Two Surfaces']] },
+              { head: 'Partners', links: [['#audiences','Health Systems'],['#audiences','Payers'],['#audiences','Research']] },
+              { head: 'Pilot Program', links: [['#contact','Request 90-Day Pilot'],['#faq','FAQ'],['mailto:pilots@fitihealth.com','Contact']] },
+            ].map(col => (
+              <div className="ft-col" key={col.head}>
+                <div className="ft-col-head">{col.head}</div>
+                {col.links.map(([h, l]) => <a href={h} key={l}>{l}</a>)}
+              </div>
+            ))}
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} FiTi Health Technologies, Inc. All rights reserved.</p>
-          <div className="compliance">
-            <span className="comp-badge">HIPAA</span>
-            <span className="comp-badge">FHIR R4</span>
-            <span className="comp-badge">SOC 2 TYPE II</span>
+          <div className="fb-copy">
+            © {year} FiTi Health Technologies, Inc. All outcome benchmarks and cost projections on this site are illustrative estimates modeled from published social-prescribing literature and systematic health economics reviews. Individual clinical results will vary.
           </div>
+          <div className="fb-mono">ACCEPTING 90-DAY PILOT COHORTS</div>
         </div>
       </div>
     </footer>
   )
 }
 
-/* ═════════════════════════════════════════════════════════════
-   APP ROOT
-   ═════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════════════
+   APP
+   ═══════════════════════════════════════════════════════════════════════════ */
 export default function App() {
   return (
     <>
       <Nav />
       <main>
         <Hero />
-        <Crisis />
-        <Proof />
+        <Evidence />
         <Platform />
-        <Flow />
+        <Security />
+        <Interface />
+        <PilotModeler />
         <Audiences />
         <FAQ />
-        <Evidence />
         <Contact />
       </main>
       <Footer />
